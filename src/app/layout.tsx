@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${roboto.variable} font-sans antialiased selection:bg-purple-500/30 min-h-screen bg-background text-foreground leading-relaxed`}
+        className={`${roboto.variable} font-sans antialiased selection:bg-purple-500/30 min-h-screen flex flex-col bg-background text-foreground leading-relaxed`}
       >
         <ThemeProvider
           attribute="class"

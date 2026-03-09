@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function HeroSection() {
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-[70vh] px-4 overflow-hidden pt-20">
+    <section className="relative flex flex-col items-center justify-center min-h-fit md:min-h-screen px-4 pb-0 md:pb-20 overflow-hidden pt-0 md:pt-16 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -18,12 +18,12 @@ export function HeroSection() {
           Available for new opportunities
         </div>
         
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 flex items-center justify-center">
+        <h1 className="text-4xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 flex items-center justify-center">
           Hi, I'm Alfareza
           <motion.span 
             animate={{ opacity: [1, 0] }} 
             transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-            className="w-[4px] md:w-[8px] h-[40px] md:h-[70px] bg-cyan-400 ml-2"
+            className="w-[4px] md:w-[8px] h-[30px] md:h-[70px] bg-cyan-400 ml-2"
           />
         </h1>
         

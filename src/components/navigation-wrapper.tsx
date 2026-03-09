@@ -8,12 +8,12 @@ export function NavigationWrapper({ children }: { children: React.ReactNode }) {
   const isHiddenRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/auth");
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen w-full">
       {!isHiddenRoute && <Header />}
-      <main className="flex flex-col flex-1 min-h-screen w-full">
+      <main className="flex flex-col flex-1 w-full">
         {children}
       </main>
       {!isHiddenRoute && <Footer />}
-    </>
+    </div>
   );
 }

@@ -39,7 +39,7 @@ export function AboutAndSkills() {
 
       {/* Skills 4x2 Grid */}
       <div>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {skills.map((skill) => (
             <div 
               key={skill.name} 

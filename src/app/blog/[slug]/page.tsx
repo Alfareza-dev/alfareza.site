@@ -77,7 +77,7 @@ export default async function BlogPostPage({
   return (
     <article className="flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-screen">
       <header className="mb-12 border-b border-white/10 pb-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-6">
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-6">
           {post.title}
         </h1>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -104,7 +104,7 @@ export default async function BlogPostPage({
         {post.content.split("---").filter(section => section.trim()).map((section, index) => (
           <div 
             key={index} 
-            className="group relative p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-purple-500/30 transition-all duration-500 overflow-hidden"
+            className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-purple-500/30 transition-all duration-500 overflow-hidden"
           >
             {/* Subtle purple glow effect on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

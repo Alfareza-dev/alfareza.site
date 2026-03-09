@@ -23,7 +23,7 @@ export default async function BlogPage() {
   return (
     <div className="flex flex-col flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Blog</h1>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">Blog</h1>
         <p className="text-lg text-muted-foreground">
           Thoughts, technical tutorials, and insights about software engineering.
         </p>

@@ -159,7 +159,7 @@ export function PostForm({ post }: PostFormProps) {
                     content.split("---").filter(section => section.trim()).map((section, index) => (
                       <div 
                         key={index} 
-                        className="group relative p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-purple-500/30 transition-all duration-500 overflow-hidden"
+                        className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-purple-500/30 transition-all duration-500 overflow-hidden"
                       >
                         {/* Subtle purple glow effect on hover */}
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

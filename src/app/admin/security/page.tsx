@@ -101,12 +101,12 @@ export default async function SecurityDashboard() {
                           {alert.country ? (
                             <span className="flex items-center gap-1.5 opacity-80 font-medium text-cyan-400">
                               <MapPin className="w-3.5 h-3.5" />
-                              {alert.city}, {alert.country} 
+                              {alert.city}, {alert.country}
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1.5 opacity-80">
-                              <MapPin className="w-3.5 h-3.5 text-cyan-500" />
-                              Location tracking pending
+                            <span className="flex items-center gap-1.5 opacity-80 font-mono text-cyan-600 border border-cyan-800/30 bg-cyan-950/20 px-1.5 py-0.5 rounded">
+                              <MapPin className="w-3.5 h-3.5" />
+                              VERCEL_EDGE_BYPASS // LOCAL_NET
                             </span>
                           )}
                           <span className={`font-mono px-2 py-0.5 rounded ${

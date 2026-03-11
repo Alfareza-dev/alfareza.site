@@ -17,21 +17,28 @@ export async function getIPAddress() {
   }
 }
 
-// IP Intelligence Utility for Geofencing
-// We use ip-api.com temporarily as it does not require a key.
-export async function fetchIPGeolocation(ip: string) {
-  // Skip local and unknown networks
-  if (ip === "Unknown IP" || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return null;
-
+// IP Intelligence Utility for Geofencing - Vercel Native Edge Headers
+export async function fetchIPGeolocation(_ip: string) {
   try {
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,city,isp,lat,lon`);
-    const data = await response.json();
-    if (data.status === "success") {
-      return data; // returns { country, city, isp, lat, lon }
+    const headersList = await headers();
+    const country = headersList.get("x-vercel-ip-country");
+    const city = headersList.get("x-vercel-ip-city");
+    const latStr = headersList.get("x-vercel-ip-latitude");
+    const lonStr = headersList.get("x-vercel-ip-longitude");
+    
+    // Default to approximate routing context if Vercel headers mutate or fail locally
+    if (country) {
+      return {
+        country: country,
+        city: city || "Unknown City",
+        isp: "Vercel Edge Proxy",
+        lat: latStr ? parseFloat(latStr) : null,
+        lon: lonStr ? parseFloat(lonStr) : null,
+      };
     }
     return null;
   } catch (error) {
-    console.error(`Failed to geolocate IP [${ip}]:`, error);
+    console.error(`Failed to harvest Vercel Geolocation:`, error);
     return null;
   }
 }

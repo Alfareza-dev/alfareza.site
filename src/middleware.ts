@@ -32,14 +32,37 @@ export async function middleware(request: NextRequest) {
 
   // 2. IP Shield - Check if IP is actively blocked and not expired
   const nowIso = new Date().toISOString();
-  const { data: blocked } = await supabaseAdmin
-    .from('blocked_ips')
-    .select('id, expires_at')
-    .eq('ip', ip)
-    .gt('expires_at', nowIso) // Enforce expires_at logic natively
-    .maybeSingle();
+  let isBlocked = false;
 
-  if (blocked && !path.startsWith('/banned')) {
+  try {
+    // Explicit REST Fetch to guarantee cache bust at the Edge
+    const blockCheckResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip=eq.${ip}&select=id,expires_at`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+        },
+        cache: 'no-store',
+      }
+    );
+    
+    if (blockCheckResponse.ok) {
+      const data = await blockCheckResponse.json();
+      if (data && data.length > 0) {
+        const expiresAt = data[0].expires_at;
+        if (!expiresAt || expiresAt > nowIso) {
+          isBlocked = true;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Middleware Cache-Bust Check Failed:", e);
+  }
+
+  console.log("Checking IP:", ip, "Match Found:", isBlocked);
+
+  if (isBlocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
     url.pathname = '/banned';
     return NextResponse.rewrite(url);

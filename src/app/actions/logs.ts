@@ -85,17 +85,24 @@ export async function logFailedLogin(emailAttempt: string) {
   }
 }
 
-export async function blockIPAddress(ip: string, reason: string = "Manual block triggered by Administrator") {
+export async function blockIPAddress(
+  ip: string, 
+  reason: string = "Manual block triggered by Administrator",
+  duration: "24h" | "permanent" = "24h"
+) {
   const supabase = await createClient();
 
   // Validate user login
   const { data: { user } } = await supabase.auth.getUser();
-  if (user?.email !== "alfareza.dev@gmail.com") {
+  if (user?.email !== "alfareza.dev@gmail.com" && reason !== "Honeypot Triggered: Automated Bot Detection" && !reason.includes("Rate Limit Exceeded")) {
     return { success: false, message: "Unauthorized to block IPs." };
   }
 
-  // Insert with 24 Hours expiry
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  // Calculate explicit expiry
+  let expiresAt: string | null = null;
+  if (duration === "24h") {
+    expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  }
 
   // Attempt to insert into blocked_ips
   const { error: blockError } = await supabaseAdmin
@@ -117,7 +124,7 @@ export async function blockIPAddress(ip: string, reason: string = "Manual block 
     .insert({
       action: "IP_BANNED",
       details: `IP Address Blocked: ${ip}. Reason: ${reason}`,
-      admin_email: user.email,
+      admin_email: user?.email || "System/Security",
     });
     
   return { success: true, message: "IP successfully blocked." };

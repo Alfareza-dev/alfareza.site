@@ -24,6 +24,13 @@ export async function submitContactForm(prevState: any, formData: FormData) {
   // Try to insert only if the Supabase URL config is available
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
     const ip = await getIPAddress();
+    
+    // 0. The Honeypot Trap: Verify if bot triggered the secret trap.
+    if (data.website_url_verification && data.website_url_verification !== "") {
+      await blockIPAddress(ip, "Honeypot Triggered: Automated Bot Detection", "permanent");
+      return { success: false, error: "Akses ditolak karena aktivitas otomatis. IP Anda telah diblokir secara permanen." };
+    }
+
     const nowIso = new Date().toISOString();
 
     // 1. Double verification: Ensure IP isn't already blocked (though Middleware should catch this, it's a safe secondary barrier)

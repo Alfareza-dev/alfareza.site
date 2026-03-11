@@ -142,6 +142,15 @@ export function ContactForm() {
               </div>
             )}
 
+            {/* Honeypot Trap for Bots */}
+            <input 
+              type="text" 
+              name="website_url_verification" 
+              className="hidden" 
+              tabIndex={-1} 
+              autoComplete="off" 
+            />
+
             <button
               type="submit"
               disabled={isPending}

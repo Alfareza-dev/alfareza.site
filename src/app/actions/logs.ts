@@ -133,7 +133,7 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
       .from("activity_logs")
       .select("id")
       .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
-      .like("details", `%IP: ${sanitizedIp}%`)
+      .eq("isp", sanitizedIp)
       .gte("created_at", tenMinsAgo);
 
     if (countError) {
@@ -177,7 +177,7 @@ export async function blockIPAddress(
   const supabase = await createClient();
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("[SECURITY FATAL] MISSING SERVICE ROLE KEY IN PRODUCTION!");
+    console.error("MISSING SERVICE ROLE KEY!");
   }
 
   // Validate user login
@@ -196,35 +196,29 @@ export async function blockIPAddress(
   const geodata = await fetchIPGeolocation(sanitizedIp);
 
   console.log("ATTEMPTING AUTO-BLOCK FOR:", sanitizedIp);
+  const headersList = await headers();
   // Attempt to insert into blocked_ips
-  const { error: upsertError } = await supabaseAdmin
-    .from("blocked_ips")
+  const { data, error } = await supabaseAdmin
+    .from('blocked_ips')
     .upsert({ 
       ip: sanitizedIp, 
-      reason, 
+      reason: reason || "Auto-blocked: 5+ failed attempts",
       expires_at: expiresAt,
-      ...(geodata && {
-        country: geodata.country,
-        city: geodata.city,
-        isp: geodata.isp,
-        lat: geodata.lat,
-        lon: geodata.lon,
-      })
-    }, { onConflict: "ip" })
+      country: headersList.get('x-vercel-ip-country'),
+      city: headersList.get('x-vercel-ip-city'),
+      isp: geodata?.isp || "Detected Provider", // Nama ISP sebenarnya
+      lat: parseFloat(headersList.get('x-vercel-ip-latitude') || '0'),
+      lon: parseFloat(headersList.get('x-vercel-ip-longitude') || '0')
+    }, { onConflict: 'ip' })
     .select();
 
-  // Handle DB errors natively reporting error arrays for server debugging
-  if (upsertError) {
-    if (upsertError.code === '23505') {
-       console.log("[DATABASE SUCCESS] IP is already blocked:", sanitizedIp);
-       return { success: true, message: "IP is already blocked." };
-    }
-    console.error("[SUPABASE FATAL] Insert Blocked IP Failed:", upsertError.message);
+  if (error) {
+    console.error("[DATABASE CRITICAL] Upsert Failed:", error.message, "Code:", error.code);
     return { success: false, message: "Failed to block IP due to a server error." };
   }
 
   // Explicit Success Trace
-  console.log("[DATABASE SUCCESS] IP Successfully Blocked:", sanitizedIp);
+  console.log("[DATABASE SUCCESS] IP Successfully Blocked & Persistent:", data);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin

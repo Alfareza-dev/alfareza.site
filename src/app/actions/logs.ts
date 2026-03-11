@@ -197,7 +197,7 @@ export async function blockIPAddress(
 
   console.log("ATTEMPTING AUTO-BLOCK FOR:", sanitizedIp);
   // Attempt to insert into blocked_ips
-  const { data, error: blockError } = await supabaseAdmin
+  const { error: upsertError } = await supabaseAdmin
     .from("blocked_ips")
     .upsert({ 
       ip: sanitizedIp, 
@@ -214,12 +214,12 @@ export async function blockIPAddress(
     .select();
 
   // Handle DB errors natively reporting error arrays for server debugging
-  if (blockError) {
-    if (blockError.code === '23505') {
+  if (upsertError) {
+    if (upsertError.code === '23505') {
        console.log("[DATABASE SUCCESS] IP is already blocked:", sanitizedIp);
        return { success: true, message: "IP is already blocked." };
     }
-    console.error(`[DATABASE CRITICAL] Upsert Failed for ${sanitizedIp}:`, blockError.message, "Code:", blockError.code, "Details:", blockError.details);
+    console.error("[SUPABASE FATAL] Insert Blocked IP Failed:", upsertError.message);
     return { success: false, message: "Failed to block IP due to a server error." };
   }
 

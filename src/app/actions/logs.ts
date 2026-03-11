@@ -184,10 +184,11 @@ export async function blockIPAddress(
   // Execute the Geolocation trap to deeply trace the attacker
   const geodata = await fetchIPGeolocation(sanitizedIp);
 
+  console.log("ATTEMPTING AUTO-BLOCK FOR:", sanitizedIp);
   // Attempt to insert into blocked_ips
   const { error: blockError } = await supabaseAdmin
     .from("blocked_ips")
-    .insert({ 
+    .upsert({ 
       ip: sanitizedIp, 
       reason, 
       expires_at: expiresAt,
@@ -198,7 +199,7 @@ export async function blockIPAddress(
         lat: geodata.lat,
         lon: geodata.lon,
       })
-    });
+    }, { onConflict: "ip" });
 
   // Handle unique violation (Postgres error code '23505')
   if (blockError) {
@@ -225,6 +226,9 @@ export async function blockIPAddress(
       })
     });
     
+  revalidatePath('/admin');
+  revalidatePath('/admin/security');
+  
   return { success: true, message: "IP successfully blocked." };
 }
 

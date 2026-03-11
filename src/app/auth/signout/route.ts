@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createClient();
   
   const { createLog } = await import("@/app/actions/logs");
@@ -9,8 +9,8 @@ export async function POST() {
 
   await supabase.auth.signOut();
   
-  // Create a response that redirects to home page
-  return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_SITE_URL || "https://alfareza.site"), {
+  // Create a response that redirects to auth page dynamically
+  return NextResponse.redirect(new URL("/auth", request.url).toString(), {
     status: 302,
   });
 }

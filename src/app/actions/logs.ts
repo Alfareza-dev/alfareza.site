@@ -85,3 +85,39 @@ export async function logFailedLogin(emailAttempt: string) {
   }
 }
 
+export async function blockIPAddress(ip: string, reason: string = "Manual block triggered by Administrator") {
+  const supabase = await createClient();
+
+  // Validate user login
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email !== "alfareza.dev@gmail.com") {
+    return { success: false, message: "Unauthorized to block IPs." };
+  }
+
+  // Attempt to insert into blocked_ips
+  const { error: blockError } = await supabaseAdmin
+    .from("blocked_ips")
+    .insert({ ip, reason });
+
+  // Handle unique violation (Postgres error code '23505')
+  if (blockError) {
+    if (blockError.code === '23505') {
+       return { success: true, message: "IP is already blocked." };
+    }
+    console.error("Failed to block IP:", blockError);
+    return { success: false, message: "Failed to block IP due to a server error." };
+  }
+
+  // Create log in activity logs
+  await supabaseAdmin
+    .from("activity_logs")
+    .insert({
+      action: "IP_BANNED",
+      details: `IP Address Blocked: ${ip}. Reason: ${reason}`,
+      admin_email: user.email,
+    });
+    
+  return { success: true, message: "IP successfully blocked." };
+}
+
+

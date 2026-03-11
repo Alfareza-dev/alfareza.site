@@ -41,9 +41,10 @@ export default async function AdminLayout({
               Admin <span className="text-purple-500">Dashboard</span>
             </Link>
             <nav className="hidden sm:flex items-center gap-4 text-sm font-medium">
-              <Link href="/admin" className="text-muted-foreground hover:text-white transition-colors">Posts</Link>
+              <Link href="/admin" className="text-muted-foreground hover:text-white transition-colors">Dashboard</Link>
+              <Link href="/admin/posts" className="text-muted-foreground hover:text-white transition-colors">Posts</Link>
               <Link href="/admin/messages" className="text-muted-foreground hover:text-white transition-colors">Inbox</Link>
-              <Link href="/admin/activity" className="text-muted-foreground hover:text-white transition-colors">Activity Log</Link>
+              <Link href="/admin/activity" className="text-muted-foreground hover:text-white transition-colors">Activity</Link>
               <Link href="/admin/security" className="text-muted-foreground hover:text-white transition-colors flex items-center gap-1.5 relative">
                 Security
                 {hasCriticalAlert && (

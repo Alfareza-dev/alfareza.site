@@ -133,6 +133,7 @@ export function Footer() {
         <Link href="/" className="hover:text-white transition-colors">Home</Link>
         <Link href="/portfolio" className="hover:text-white transition-colors">Portfolio</Link>
         <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
         {!hideAdminLink && (
           <Link href="/auth" className="hover:text-white transition-colors">Admin Login</Link>
         )}

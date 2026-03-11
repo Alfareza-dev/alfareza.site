@@ -1,23 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
-import { Shield, ShieldAlert, Ban, MapPin } from "lucide-react";
+import { Shield, ShieldAlert, MapPin } from "lucide-react";
+import { BlockIPButton } from "@/components/admin/BlockIPButton";
+import { RelativeTime } from "@/components/admin/RelativeTime";
 
 export const dynamic = "force-dynamic";
-
-function formatDistanceToNowNative(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} hours ago`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) return `${diffInDays} days ago`;
-  return `${Math.floor(diffInMonths / 12)} years ago`;
-}
 
 export default async function SecurityDashboard() {
   const supabase = await createClient();
@@ -39,6 +25,13 @@ export default async function SecurityDashboard() {
     return match ? match[1] : "Unknown";
   };
 
+  // Fetch blocked IPs to know initial state precisely with Service Role bypass
+  const supabaseAdmin = (await import("@/lib/supabaseAdmin")).supabaseAdmin;
+  const { data: blockedList } = await supabaseAdmin
+    .from("blocked_ips")
+    .select("ip");
+  const blockedIps = new Set(blockedList?.map(b => b.ip));
+
   return (
     <div className="space-y-8 font-sans">
       <div className="flex items-center justify-between">
@@ -53,23 +46,26 @@ export default async function SecurityDashboard() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl overflow-hidden shadow-2xl">
+      <div className="rounded-xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl p-6">
         {alerts?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
+          <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground w-full">
             <Shield className="w-12 h-12 mb-4 opacity-50 text-purple-500" />
             <p>No security threats detected. Your system is safe.</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="flex flex-col gap-4">
             {alerts?.map((alert) => {
               const isCritical = alert.action === "SECURITY_ALERT_CRITICAL";
               const ip = extractIP(alert.details);
+              const initiallyBlocked = blockedIps.has(ip);
               
               return (
                 <div 
                   key={alert.id} 
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 transition-colors ${
-                    isCritical ? 'bg-red-500/5 hover:bg-red-500/10' : 'hover:bg-white/[0.04]'
+                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-xl border transition-colors ${
+                    isCritical 
+                      ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10' 
+                      : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.04]'
                   }`}
                 >
                   <div className="flex items-start gap-4 flex-1">
@@ -84,7 +80,7 @@ export default async function SecurityDashboard() {
                           {isCritical ? 'CRITICAL ALERT' : 'Failed Login Attempt'}
                         </h3>
                         <span className="text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-md border border-white/10">
-                          {formatDistanceToNowNative(alert.created_at)}
+                          <RelativeTime date={alert.created_at} />
                         </span>
                       </div>
                       <p className="text-sm text-gray-300 mb-2">
@@ -102,10 +98,7 @@ export default async function SecurityDashboard() {
                     </div>
                   </div>
                   
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-white/5 border border-white/10 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition-all shrink-0">
-                    <Ban className="w-4 h-4" />
-                    Block IP
-                  </button>
+                  <BlockIPButton ip={ip} initiallyBlocked={initiallyBlocked} />
                 </div>
               );
             })}

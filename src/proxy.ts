@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { updateSession } from "@/utils/supabase/middleware"
 import { createClient } from "@supabase/supabase-js"
+import { formatSafeIP } from "@/lib/security-utils"
 
 export const runtime = 'edge';
 
@@ -18,20 +19,6 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (path.startsWith('/_next/') || path.includes('.')) {
     return await updateSession(request);
-  }
-
-  // Formatting Utility
-  function formatSafeIP(rawIP: string | null): string {
-    if (!rawIP) return "Unknown IP";
-    let ip = String(rawIP); // Force type-safety explicitly against null bindings causing crashes
-    if (ip.includes(",")) {
-      ip = ip.split(",")[0];
-    }
-    ip = ip.replace(/[.\s]+$/, "").trim();
-    if (ip.startsWith("::ffff:")) {
-      ip = ip.substring(7);
-    }
-    return ip || "Unknown IP";
   }
 
   // 1. Extract IP Address securely

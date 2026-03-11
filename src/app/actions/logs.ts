@@ -99,66 +99,73 @@ export async function createLog(action: string, details: string, emailFallback?:
 }
 
 export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: boolean }> {
-  const sanitizedIp = await getIPAddress();
-  const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  try {
+    const sanitizedIp = await getIPAddress();
+    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
-  // 1. Insert the failed login log FIRST unconditionally
-  const details = `Failed login attempt from IP: ${sanitizedIp} | Username: ${emailAttempt}`;
-  const geodata = await fetchIPGeolocation(sanitizedIp);
+    // 1. Insert the failed login log FIRST unconditionally
+    const details = `Failed login attempt from IP: ${sanitizedIp} | Username: ${emailAttempt}`;
+    const geodata = await fetchIPGeolocation(sanitizedIp);
 
-  const { data: insertedLog, error: insertError } = await supabaseAdmin
-    .from("activity_logs")
-    .insert({
-      action: "LOGIN_FAILURE",
-      details,
-      admin_email: "System/Security",
-      ...(geodata && {
-        country: geodata.country,
-        city: geodata.city,
-        isp: geodata.isp,
-        lat: geodata.lat,
-        lon: geodata.lon,
-      }),
-    })
-    .select("id")
-    .single();
+    const { data: insertedLog, error: insertError } = await supabaseAdmin
+      .from("activity_logs")
+      .insert({
+        action: "LOGIN_FAILURE",
+        details,
+        admin_email: "System/Security",
+        ...(geodata && {
+          country: geodata.country,
+          city: geodata.city,
+          isp: geodata.isp,
+          lat: geodata.lat,
+          lon: geodata.lon,
+        }),
+      })
+      .select("id")
+      .single();
 
-  if (insertError) {
-    console.error("Failed to record login failure:", insertError);
-  }
-
-  // 2. NOW check how many failures from this IP in the last 10 minutes (inclusive of the one just inserted)
-  const { data: recentFailures } = await supabaseAdmin
-    .from("activity_logs")
-    .select("id")
-    .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
-    .like("details", `%IP: ${sanitizedIp}%`)
-    .gte("created_at", tenMinsAgo);
-
-  const failureCount = recentFailures?.length || 0;
-
-  // 3. 5-STRIKE AUTO BLOCK EXECUTION
-  if (failureCount >= 5) {
-    console.log(`[SECURITY] 5-Strike Auto-Ban Executed for IP: ${sanitizedIp}`);
-    
-    // Upgrade the just-inserted log to CRITICAL instead
-    if (insertedLog) {
-      await supabaseAdmin
-        .from("activity_logs")
-        .update({ action: "SECURITY_ALERT_CRITICAL" })
-        .eq("id", insertedLog.id);
+    if (insertError) {
+      console.error("[DB ERROR] Failed to record login failure:", insertError.code, insertError.message);
     }
 
-    // Await the block and dynamically reload Admin panels
-    await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
-    
-    revalidatePath("/admin");
-    revalidatePath("/admin/security");
+    // 2. NOW check how many failures from this IP in the last 10 minutes (inclusive of the one just inserted)
+    const { data: recentFailures, error: countError } = await supabaseAdmin
+      .from("activity_logs")
+      .select("id")
+      .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
+      .like("details", `%IP: ${sanitizedIp}%`)
+      .gte("created_at", tenMinsAgo);
 
-    return { isBanned: true };
+    if (countError) {
+      console.error("[DB ERROR] Failed to count login failures:", countError.code, countError.message);
+    }
+
+    const failureCount = recentFailures?.length || 0;
+
+    // 3. 5-STRIKE AUTO BLOCK EXECUTION
+    if (failureCount >= 5) {
+      console.log(`[SECURITY] 5-Strike Auto-Ban Executed for IP: ${sanitizedIp}`);
+      
+      // Upgrade the just-inserted log to CRITICAL instead
+      if (insertedLog) {
+        await supabaseAdmin
+          .from("activity_logs")
+          .update({ action: "SECURITY_ALERT_CRITICAL" })
+          .eq("id", insertedLog.id);
+      }
+
+      // Await the block and dynamically reload Admin panels
+      await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+      
+      // UI force-revalidation happens within blockIPAddress after DB confirms write success
+      return { isBanned: true };
+    }
+    
+    return { isBanned: false };
+  } catch (err) {
+    console.error(`[SECURITY] FATAL Auto-Ban sequence failed:`, err);
+    return { isBanned: false }; // Fail silently to client, leave alert in Vercel logs
   }
-  
-  return { isBanned: false };
 }
 
 export async function blockIPAddress(
@@ -201,14 +208,17 @@ export async function blockIPAddress(
       })
     }, { onConflict: "ip" });
 
-  // Handle unique violation (Postgres error code '23505')
+  // Handle DB errors natively reporting error arrays for server debugging
   if (blockError) {
     if (blockError.code === '23505') {
        return { success: true, message: "IP is already blocked." };
     }
-    console.error("Failed to block IP:", blockError);
+    console.error(`[DB ERROR] Block IP Failed for ${sanitizedIp}:`, blockError.code, blockError.message);
     return { success: false, message: "Failed to block IP due to a server error." };
   }
+
+  // Explicit Success Trace
+  console.log("[SECURITY] DB Confirmation Received for IP:", sanitizedIp);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin

@@ -6,7 +6,7 @@ export async function POST() {
   await supabase.auth.signOut();
   
   // Create a response that redirects to home page
-  return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"), {
+  return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_SITE_URL || "https://alfareza.site"), {
     status: 302,
   });
 }

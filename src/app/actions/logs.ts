@@ -67,9 +67,9 @@ export async function createLog(action: string, details: string, emailFallback?:
   
   let finalDetails = details;
   let geodata = null;
+  const sanitizedIp = await getIPAddress();
 
   if (action === "ADMIN_LOGIN" || action === "ADMIN_LOGOUT") {
-    const sanitizedIp = await getIPAddress();
     finalDetails = `${details} (IP: ${sanitizedIp})`;
     // Optionally fetch geodata for every admin login
     if (action === "ADMIN_LOGIN") {
@@ -87,10 +87,10 @@ export async function createLog(action: string, details: string, emailFallback?:
       ...(geodata && {
         country: geodata.country,
         city: geodata.city,
-        isp: geodata.isp,
         lat: geodata.lat,
         lon: geodata.lon,
       }),
+      isp: (action === "ADMIN_LOGIN" || action === "ADMIN_LOGOUT") ? sanitizedIp : (geodata?.isp || "Local/Unknown"),
     });
 
   if (insertError) {
@@ -116,10 +116,10 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
         ...(geodata && {
           country: geodata.country,
           city: geodata.city,
-          isp: geodata.isp,
           lat: geodata.lat,
           lon: geodata.lon,
         }),
+        isp: sanitizedIp,
       })
       .select("id")
       .single();
@@ -236,10 +236,10 @@ export async function blockIPAddress(
       ...(geodata && {
         country: geodata.country,
         city: geodata.city,
-        isp: geodata.isp,
         lat: geodata.lat,
         lon: geodata.lon,
-      })
+      }),
+      isp: sanitizedIp,
     });
     
   // Explicitly sync the cache only on perfect db confirmation execution bounds

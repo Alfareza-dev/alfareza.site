@@ -97,7 +97,7 @@ export async function createLog(action: string, details: string, emailFallback?:
   }
 }
 
-export async function logFailedLogin(emailAttempt: string) {
+export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: boolean }> {
   const sanitizedIp = await getIPAddress();
   const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
@@ -113,7 +113,7 @@ export async function logFailedLogin(emailAttempt: string) {
   
   // > 5 failures means 6th attempt triggers critical
   const actionName = failureCount >= 5 ? "SECURITY_ALERT_CRITICAL" : "LOGIN_FAILURE";
-  const details = `Failed login attempt from IP: ${sanitizedIp}. Username: ${emailAttempt}`;
+  const details = `Failed login attempt from IP: ${sanitizedIp} | Username: ${emailAttempt}`;
   
   // Bind Geofencing intelligence against hostile login sources
   const geodata = await fetchIPGeolocation(sanitizedIp);
@@ -136,6 +136,16 @@ export async function logFailedLogin(emailAttempt: string) {
   if (insertError) {
     console.error("Failed to record login failure:", insertError);
   }
+
+  // 5-STRIKE AUTO BLOCK EXECUTION
+  // Explicitly tie the IP to the Vercel edge interceptor if criteria trigger.
+  if (failureCount >= 5) {
+    console.log(`[SECURITY] 5-Strike Auto-Ban Executed for IP: ${sanitizedIp}`);
+    // Passing "permanent" or "24h" automatically routes through blockIPAddress rules identically to Admin blocks.
+    await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+    return { isBanned: true };
+  }
+  return { isBanned: false };
 }
 
 export async function blockIPAddress(

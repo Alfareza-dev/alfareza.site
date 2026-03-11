@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { Shield, ShieldAlert, MapPin, Ghost, Info, Globe, AlertTriangle } from "lucide-react";
 import { BlockIPButton } from "@/components/admin/BlockIPButton";
+import { formatSafeIP } from "@/lib/security-utils";
 import { RelativeTime } from "@/components/admin/RelativeTime";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { ClientMountedWrapper } from "@/components/admin/ClientMountedWrapper";
@@ -24,7 +25,7 @@ export default async function SecurityDashboard() {
   // Extract IP utility for the UI
   const extractIP = (details: string) => {
     const match = details.match(/IP: ([\d\.:a-fA-F]+)/);
-    return match ? match[1] : "Unknown";
+    return formatSafeIP(match ? match[1] : "Unknown");
   };
 
   // Fetch blocked IPs to know initial state precisely with Service Role bypass

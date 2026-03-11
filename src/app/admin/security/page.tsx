@@ -20,6 +20,15 @@ export default async function SecurityDashboard() {
 
   if (error) {
     console.error("Failed to fetch security logs:", error);
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <AlertTriangle className="w-16 h-16 text-red-500 animate-pulse" />
+        <h1 className="text-3xl font-bold text-white">Database Sync Error</h1>
+        <p className="text-muted-foreground text-red-300">
+          Failed to synchronize with Supabase Security Logs. Please check the Vercel connection.
+        </p>
+      </div>
+    );
   }
 
   // Extract IP utility for the UI

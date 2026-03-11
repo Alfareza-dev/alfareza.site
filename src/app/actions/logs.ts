@@ -176,6 +176,10 @@ export async function blockIPAddress(
   const sanitizedIp = formatSafeIP(rawIp);
   const supabase = await createClient();
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("[SECURITY FATAL] MISSING SERVICE ROLE KEY IN PRODUCTION!");
+  }
+
   // Validate user login
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.email !== "alfareza.dev@gmail.com" && reason !== "Honeypot Triggered: Automated Bot Detection" && !reason.includes("Rate Limit Exceeded")) {
@@ -193,7 +197,7 @@ export async function blockIPAddress(
 
   console.log("ATTEMPTING AUTO-BLOCK FOR:", sanitizedIp);
   // Attempt to insert into blocked_ips
-  const { error: blockError } = await supabaseAdmin
+  const { data, error: blockError } = await supabaseAdmin
     .from("blocked_ips")
     .upsert({ 
       ip: sanitizedIp, 
@@ -206,19 +210,21 @@ export async function blockIPAddress(
         lat: geodata.lat,
         lon: geodata.lon,
       })
-    }, { onConflict: "ip" });
+    }, { onConflict: "ip" })
+    .select();
 
   // Handle DB errors natively reporting error arrays for server debugging
   if (blockError) {
     if (blockError.code === '23505') {
+       console.log("[DATABASE SUCCESS] IP is already blocked:", sanitizedIp);
        return { success: true, message: "IP is already blocked." };
     }
-    console.error(`[DB ERROR] Block IP Failed for ${sanitizedIp}:`, blockError.code, blockError.message);
+    console.error(`[DATABASE CRITICAL] Upsert Failed for ${sanitizedIp}:`, blockError.message, "Code:", blockError.code, "Details:", blockError.details);
     return { success: false, message: "Failed to block IP due to a server error." };
   }
 
   // Explicit Success Trace
-  console.log("[SECURITY] DB Confirmation Received for IP:", sanitizedIp);
+  console.log("[DATABASE SUCCESS] IP Successfully Blocked:", sanitizedIp);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin
@@ -236,6 +242,7 @@ export async function blockIPAddress(
       })
     });
     
+  // Explicitly sync the cache only on perfect db confirmation execution bounds
   revalidatePath('/admin');
   revalidatePath('/admin/security');
   

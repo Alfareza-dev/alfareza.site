@@ -35,6 +35,7 @@ export async function proxy(request: NextRequest) {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
           Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+          Pragma: 'no-cache',
         },
         cache: 'no-store',
       }

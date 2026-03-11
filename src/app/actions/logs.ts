@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { formatSafeIP } from "@/lib/security-utils";
+import { revalidatePath } from "next/cache";
 
 export async function getIPAddress() {
   try {
@@ -101,27 +102,14 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
   const sanitizedIp = await getIPAddress();
   const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
-  // Check how many failures from this IP in the last 10 minutes
-  const { data: recentFailures } = await supabaseAdmin
-    .from("activity_logs")
-    .select("id")
-    .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
-    .like("details", `%IP: ${sanitizedIp}%`)
-    .gte("created_at", tenMinsAgo);
-
-  const failureCount = recentFailures?.length || 0;
-  
-  // > 5 failures means 6th attempt triggers critical
-  const actionName = failureCount >= 5 ? "SECURITY_ALERT_CRITICAL" : "LOGIN_FAILURE";
+  // 1. Insert the failed login log FIRST unconditionally
   const details = `Failed login attempt from IP: ${sanitizedIp} | Username: ${emailAttempt}`;
-  
-  // Bind Geofencing intelligence against hostile login sources
   const geodata = await fetchIPGeolocation(sanitizedIp);
 
-  const { error: insertError } = await supabaseAdmin
+  const { data: insertedLog, error: insertError } = await supabaseAdmin
     .from("activity_logs")
     .insert({
-      action: actionName,
+      action: "LOGIN_FAILURE",
       details,
       admin_email: "System/Security",
       ...(geodata && {
@@ -131,20 +119,45 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
         lat: geodata.lat,
         lon: geodata.lon,
       }),
-    });
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     console.error("Failed to record login failure:", insertError);
   }
 
-  // 5-STRIKE AUTO BLOCK EXECUTION
-  // Explicitly tie the IP to the Vercel edge interceptor if criteria trigger.
+  // 2. NOW check how many failures from this IP in the last 10 minutes (inclusive of the one just inserted)
+  const { data: recentFailures } = await supabaseAdmin
+    .from("activity_logs")
+    .select("id")
+    .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
+    .like("details", `%IP: ${sanitizedIp}%`)
+    .gte("created_at", tenMinsAgo);
+
+  const failureCount = recentFailures?.length || 0;
+
+  // 3. 5-STRIKE AUTO BLOCK EXECUTION
   if (failureCount >= 5) {
     console.log(`[SECURITY] 5-Strike Auto-Ban Executed for IP: ${sanitizedIp}`);
-    // Passing "permanent" or "24h" automatically routes through blockIPAddress rules identically to Admin blocks.
+    
+    // Upgrade the just-inserted log to CRITICAL instead
+    if (insertedLog) {
+      await supabaseAdmin
+        .from("activity_logs")
+        .update({ action: "SECURITY_ALERT_CRITICAL" })
+        .eq("id", insertedLog.id);
+    }
+
+    // Await the block and dynamically reload Admin panels
     await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+    
+    revalidatePath("/admin");
+    revalidatePath("/admin/security");
+
     return { isBanned: true };
   }
+  
   return { isBanned: false };
 }
 

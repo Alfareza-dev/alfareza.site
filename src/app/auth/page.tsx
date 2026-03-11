@@ -31,7 +31,7 @@ export default function LoginPage() {
       const blockCheck = await logFailedLogin(email);
 
       // Instantly trigger Vercel Proxy evaluation intercepting this machine if Banned
-      if (blockCheck?.isBanned || error.message.includes("blocked")) {
+      if (blockCheck?.isBanned === true) {
         window.location.reload();
         return; // Break script execution
       }

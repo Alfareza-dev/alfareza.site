@@ -213,12 +213,12 @@ export async function blockIPAddress(
     .select();
 
   if (error) {
-    console.error("[DATABASE CRITICAL] Upsert Failed:", error.message, "Code:", error.code);
-    return { success: false, message: "Failed to block IP due to a server error." };
+    console.error("[DATABASE FATAL] Upsert failed:", error.message);
+    throw new Error(error.message);
   }
 
   // Explicit Success Trace
-  console.log("[DATABASE SUCCESS] IP Successfully Blocked & Persistent:", data);
+  console.log("[DATABASE SUCCESS] IP locked in DB:", sanitizedIp);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin

@@ -8,10 +8,13 @@ export async function getIPAddress() {
   try {
     const headersList = await headers();
     const forwardedFor = headersList.get("x-forwarded-for");
+    let ip = "Unknown IP";
     if (forwardedFor) {
-      return forwardedFor.split(",")[0].trim();
+      ip = forwardedFor.split(",")[0];
+    } else {
+      ip = headersList.get("x-real-ip") || "Unknown IP";
     }
-    return headersList.get("x-real-ip") || "Unknown IP";
+    return ip.replace(/\.+$/, "").trim();
   } catch (e) {
     return "Unknown IP";
   }

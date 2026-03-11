@@ -23,12 +23,13 @@ export async function middleware(request: NextRequest) {
   if (ip.includes(',')) {
     ip = ip.split(',')[0];
   }
-  ip = ip.trim();
-  
   // Normalize IPv4-mapped IPv6 address
   if (ip.startsWith('::ffff:')) {
     ip = ip.substring(7);
   }
+
+  // Defensively sanitize IP format to remove malformed proxy trails
+  ip = ip.replace(/\.+$/, "").trim();
 
   // 2. IP Shield - Check if IP is actively blocked and not expired
   const nowIso = new Date().toISOString();

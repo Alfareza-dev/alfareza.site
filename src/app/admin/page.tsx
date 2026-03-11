@@ -28,7 +28,7 @@ export default async function AdminDashboardOverview() {
   // 2. Security Health
   const [{ count: criticalAlerts }, { count: blockedIPs }] = await Promise.all([
     supabase.from("activity_logs").select("*", { count: "exact", head: true }).eq("action", "SECURITY_ALERT_CRITICAL"),
-    supabase.from("blocked_ips").select("*", { count: "exact", head: true })
+    supabaseAdmin.from("blocked_ips").select("*", { count: "exact", head: true })
   ]);
 
   // 3. Last Login

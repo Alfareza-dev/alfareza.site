@@ -49,14 +49,19 @@ export default async function SecurityDashboard() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl p-6">
-        {alerts?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground w-full">
-            <Shield className="w-12 h-12 mb-4 opacity-50 text-purple-500" />
-            <p>No security threats detected. Your system is safe.</p>
-          </div>
-        ) : (
-          <ClientMountedWrapper skeleton={<div className="flex justify-center p-8 text-muted-foreground">Loading logs securely...</div>}>
+      <ClientMountedWrapper skeleton={
+        <div className="flex flex-col items-center justify-center p-20 text-muted-foreground border border-white/10 rounded-xl bg-black/50">
+          <ShieldAlert className="w-12 h-12 mb-4 opacity-50 text-red-500 animate-pulse" />
+          <p>Decrypting and verifying live security feeds...</p>
+        </div>
+      }>
+        <div className="rounded-xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl p-6">
+          {alerts?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground w-full">
+              <Shield className="w-12 h-12 mb-4 opacity-50 text-purple-500" />
+              <p>No security threats detected. Your system is safe.</p>
+            </div>
+          ) : (
             <div className="flex flex-col gap-4">
               {alerts?.map((alert) => {
                 const isCritical = alert.action === "SECURITY_ALERT_CRITICAL";
@@ -127,9 +132,8 @@ export default async function SecurityDashboard() {
                 );
               })}
             </div>
-          </ClientMountedWrapper>
-        )}
-      </div>
+          )}
+        </div>
 
       {/* ATTACK ORIGIN MAP SECTION */}
       <div className="pt-8 border-t border-white/10">
@@ -142,8 +146,7 @@ export default async function SecurityDashboard() {
           Live geofencing tracking active threats mapped to their geographic network sources.
         </p>
 
-        <ClientMountedWrapper skeleton={<div className="flex justify-center p-8 text-muted-foreground">Mapping hostile origins...</div>}>
-          {alerts?.filter(a => a.country).length === 0 ? (
+        {alerts?.filter(a => a.country).length === 0 ? (
             <div className="text-center p-8 bg-white/[0.02] border border-white/10 rounded-2xl">
               <Info className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p>No geographic threat telemetry captured yet.</p>
@@ -173,7 +176,6 @@ export default async function SecurityDashboard() {
               })}
             </div>
           )}
-        </ClientMountedWrapper>
       </div>
 
       <div className="pt-8 border-t border-white/10">
@@ -186,8 +188,7 @@ export default async function SecurityDashboard() {
           A definitive log of all automated bots, scrapers, and malicious entities permanently captured by our hidden Honeypot systems.
         </p>
 
-        <ClientMountedWrapper skeleton={<div className="flex justify-center p-8 text-muted-foreground">Loading captives...</div>}>
-          {alerts?.filter(a => a.action === "HONEYPOT_TRIGGERED").length === 0 ? (
+        {alerts?.filter(a => a.action === "HONEYPOT_TRIGGERED").length === 0 ? (
             <div className="text-center p-8 bg-white/[0.02] border border-white/10 rounded-2xl">
               <Info className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p>No bots captured yet.</p>
@@ -221,8 +222,8 @@ export default async function SecurityDashboard() {
               })}
             </div>
           )}
-        </ClientMountedWrapper>
       </div>
+      </ClientMountedWrapper>
     </div>
   );
 }

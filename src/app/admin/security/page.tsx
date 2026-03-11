@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Shield, ShieldAlert, MapPin } from "lucide-react";
 import { BlockIPButton } from "@/components/admin/BlockIPButton";
 import { RelativeTime } from "@/components/admin/RelativeTime";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function SecurityDashboard() {
 
   return (
     <div className="space-y-8 font-sans">
+      <AutoRefresh intervalSeconds={30} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">

@@ -8,26 +8,33 @@ const supabaseAdmin = createClient(
 );
 
 export async function middleware(request: NextRequest) {
+  // Quick bypass for static assets to avoid unnecessary DB queries
+  const path = request.nextUrl.pathname;
+  if (path.startsWith('/_next/') || path.includes('.')) {
+    return await updateSession(request);
+  }
+
   // 1. Extract IP Address
   let ip = request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for') ?? 'Unknown';
   if (ip.includes(',')) ip = ip.split(',')[0].trim();
 
-  // 2. IP Shield - Check if IP is blocked
+  // 2. IP Shield - Check if IP is actively blocked and not expired
+  const nowIso = new Date().toISOString();
   const { data: blocked } = await supabaseAdmin
     .from('blocked_ips')
-    .select('id')
+    .select('id, expires_at')
     .eq('ip', ip)
+    .gt('expires_at', nowIso) // Enforce expires_at logic natively
     .maybeSingle();
 
-  if (blocked && !request.nextUrl.pathname.startsWith('/banned')) {
+  if (blocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
     url.pathname = '/banned';
     return NextResponse.redirect(url);
   }
 
   // 3. Visitor Logger (Exclude admin and auth routes)
-  const path = request.nextUrl.pathname;
-  if (!path.startsWith('/admin') && !path.startsWith('/auth')) {
+  if (!path.startsWith('/admin') && !path.startsWith('/auth') && !path.startsWith('/banned')) {
     const userAgent = request.headers.get('user-agent') || 'Unknown';
     // Fire the insert to track page views uniquely per hit
     await supabaseAdmin.from('visitor_stats').insert({

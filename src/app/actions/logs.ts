@@ -94,10 +94,13 @@ export async function blockIPAddress(ip: string, reason: string = "Manual block 
     return { success: false, message: "Unauthorized to block IPs." };
   }
 
+  // Insert with 24 Hours expiry
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
   // Attempt to insert into blocked_ips
   const { error: blockError } = await supabaseAdmin
     .from("blocked_ips")
-    .insert({ ip, reason });
+    .insert({ ip, reason, expires_at: expiresAt });
 
   // Handle unique violation (Postgres error code '23505')
   if (blockError) {

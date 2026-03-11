@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Users, ShieldCheck, Clock, FileText, ScanEye } from "lucide-react";
 import Link from "next/link";
 import { RelativeTime } from "@/components/admin/RelativeTime";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function AdminDashboardOverview() {
 
   return (
     <div className="space-y-8 font-sans">
+      <AutoRefresh intervalSeconds={30} />
       <div className="flex items-center justify-between pb-6 border-b border-white/10">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Command Center</h1>

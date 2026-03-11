@@ -22,21 +22,21 @@ export default function BannedPage() {
           </div>
 
           <div className="space-y-4 relative z-10">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
               Access Restricted
             </h1>
-            <p className="text-lg text-red-400 font-medium">
-              Akses Anda telah diblokir karena aktivitas mencurigakan.
+            <p className="text-lg text-red-500 font-bold tracking-wide">
+              IP Anda telah diblokir secara otomatis karena terindikasi aktivitas spam/mencurigakan.
             </p>
-            <p className="text-muted-foreground leading-relaxed mt-4">
-              Your IP address has been flagged by our security systems for violating access policies. This may occur due to repeated unauthorized login attempts or malicious behavior.
+            <p className="text-muted-foreground leading-relaxed mt-4 font-medium">
+              Blokir akan terbuka otomatis dalam 24 jam. Jika Anda merasa ini adalah kesalahan, silakan coba lagi setelah masa penangguhan berakhir.
             </p>
           </div>
 
           <div className="pt-8 border-t border-red-500/10 relative z-10 flex flex-col items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/5 px-4 py-2 rounded-lg border border-white/5">
-              <AlertOctagon className="w-4 h-4 text-orange-400" />
-              This block is logged and permanent.
+            <div className="flex items-center gap-2 text-sm font-semibold text-red-400/90 bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20">
+              <AlertOctagon className="w-4 h-4" />
+              This block is actively monitored and logged.
             </div>
           </div>
         </div>

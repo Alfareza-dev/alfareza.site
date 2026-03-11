@@ -18,18 +18,23 @@ export async function middleware(request: NextRequest) {
     return await updateSession(request);
   }
 
-  // 1. Extract IP Address securely
-  let ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'Unknown';
-  if (ip.includes(',')) {
-    ip = ip.split(',')[0];
-  }
-  // Normalize IPv4-mapped IPv6 address
-  if (ip.startsWith('::ffff:')) {
-    ip = ip.substring(7);
+  // Formatting Utility
+  function formatSafeIP(rawIP: string | null): string {
+    if (!rawIP) return "Unknown IP";
+    let ip = rawIP;
+    if (ip.includes(",")) {
+      ip = ip.split(",")[0];
+    }
+    ip = ip.replace(/[.\s]+$/, "").trim();
+    if (ip.startsWith("::ffff:")) {
+      ip = ip.substring(7);
+    }
+    return ip || "Unknown IP";
   }
 
-  // Defensively sanitize IP format to remove malformed proxy trails
-  ip = ip.replace(/\.+$/, "").trim();
+  // 1. Extract IP Address securely
+  const rawIp = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'Unknown';
+  const sanitizedIp = formatSafeIP(rawIp);
 
   // 2. IP Shield - Check if IP is actively blocked and not expired
   const nowIso = new Date().toISOString();
@@ -38,7 +43,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Explicit REST Fetch to guarantee cache bust at the Edge
     const blockCheckResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip=eq.${ip}&select=id,expires_at`,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip=eq.${sanitizedIp}&select=id,expires_at`,
       {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
@@ -61,7 +66,7 @@ export async function middleware(request: NextRequest) {
     console.error("Middleware Cache-Bust Check Failed:", e);
   }
 
-  console.log("Checking IP:", ip, "Match Found:", isBlocked);
+  console.log("Checking Sanitized IP:", sanitizedIp, "| Match Found:", isBlocked);
 
   if (isBlocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
@@ -75,7 +80,7 @@ export async function middleware(request: NextRequest) {
     // Fire the insert to track page views uniquely per hit
     await supabaseAdmin.from('visitor_stats').insert({
       path,
-      ip_address: ip,
+      ip_address: sanitizedIp,
       user_agent: userAgent
     });
   }

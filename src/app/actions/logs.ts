@@ -4,17 +4,34 @@ import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { headers } from "next/headers";
 
+// Nuclear IP Sanitization Formatter
+export function formatSafeIP(rawIP: string | null): string {
+  if (!rawIP) return "Unknown IP";
+  let ip = rawIP;
+  // If list, take first
+  if (ip.includes(",")) {
+    ip = ip.split(",")[0];
+  }
+  // Trim spaces and recursive trailing dots
+  ip = ip.replace(/[.\s]+$/, "").trim();
+  // Strip IPv6 headers
+  if (ip.startsWith("::ffff:")) {
+    ip = ip.substring(7);
+  }
+  return ip || "Unknown IP";
+}
+
 export async function getIPAddress() {
   try {
     const headersList = await headers();
     const forwardedFor = headersList.get("x-forwarded-for");
     let ip = "Unknown IP";
     if (forwardedFor) {
-      ip = forwardedFor.split(",")[0];
+      ip = forwardedFor;
     } else {
       ip = headersList.get("x-real-ip") || "Unknown IP";
     }
-    return ip.replace(/\.+$/, "").trim();
+    return formatSafeIP(ip);
   } catch (e) {
     return "Unknown IP";
   }
@@ -67,11 +84,11 @@ export async function createLog(action: string, details: string, emailFallback?:
   let geodata = null;
 
   if (action === "ADMIN_LOGIN" || action === "ADMIN_LOGOUT") {
-    const ip = await getIPAddress();
-    finalDetails = `${details} (IP: ${ip})`;
+    const sanitizedIp = await getIPAddress();
+    finalDetails = `${details} (IP: ${sanitizedIp})`;
     // Optionally fetch geodata for every admin login
     if (action === "ADMIN_LOGIN") {
-       geodata = await fetchIPGeolocation(ip);
+       geodata = await fetchIPGeolocation(sanitizedIp);
     }
   }
 
@@ -97,7 +114,7 @@ export async function createLog(action: string, details: string, emailFallback?:
 }
 
 export async function logFailedLogin(emailAttempt: string) {
-  const ip = await getIPAddress();
+  const sanitizedIp = await getIPAddress();
   const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
   // Check how many failures from this IP in the last 10 minutes
@@ -105,17 +122,17 @@ export async function logFailedLogin(emailAttempt: string) {
     .from("activity_logs")
     .select("id")
     .in("action", ["LOGIN_FAILURE", "SECURITY_ALERT_CRITICAL"])
-    .like("details", `%IP: ${ip}%`)
+    .like("details", `%IP: ${sanitizedIp}%`)
     .gte("created_at", tenMinsAgo);
 
   const failureCount = recentFailures?.length || 0;
   
   // > 5 failures means 6th attempt triggers critical
   const actionName = failureCount >= 5 ? "SECURITY_ALERT_CRITICAL" : "LOGIN_FAILURE";
-  const details = `Failed login attempt from IP: ${ip}. Username: ${emailAttempt}`;
+  const details = `Failed login attempt from IP: ${sanitizedIp}. Username: ${emailAttempt}`;
   
   // Bind Geofencing intelligence against hostile login sources
-  const geodata = await fetchIPGeolocation(ip);
+  const geodata = await fetchIPGeolocation(sanitizedIp);
 
   const { error: insertError } = await supabaseAdmin
     .from("activity_logs")
@@ -138,10 +155,11 @@ export async function logFailedLogin(emailAttempt: string) {
 }
 
 export async function blockIPAddress(
-  ip: string, 
+  rawIp: string, 
   reason: string = "Manual block triggered by Administrator",
   duration: "24h" | "permanent" = "24h"
 ) {
+  const sanitizedIp = formatSafeIP(rawIp);
   const supabase = await createClient();
 
   // Validate user login
@@ -157,13 +175,13 @@ export async function blockIPAddress(
   }
 
   // Execute the Geolocation trap to deeply trace the attacker
-  const geodata = await fetchIPGeolocation(ip);
+  const geodata = await fetchIPGeolocation(sanitizedIp);
 
   // Attempt to insert into blocked_ips
   const { error: blockError } = await supabaseAdmin
     .from("blocked_ips")
     .insert({ 
-      ip, 
+      ip: sanitizedIp, 
       reason, 
       expires_at: expiresAt,
       ...(geodata && {
@@ -189,7 +207,7 @@ export async function blockIPAddress(
     .from("activity_logs")
     .insert({
       action: "IP_BANNED",
-      details: `IP Address Blocked: ${ip}. Reason: ${reason}`,
+      details: `IP Address Blocked: ${sanitizedIp}. Reason: ${reason}`,
       admin_email: user?.email || "System/Security",
       ...(geodata && {
         country: geodata.country,

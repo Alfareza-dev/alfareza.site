@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 // Nuclear IP Sanitization Formatter
 export function formatSafeIP(rawIP: string | null): string {
   if (!rawIP) return "Unknown IP";
-  let ip = rawIP;
+  let ip = String(rawIP); // Explicit cast to secure against unhandled edge properties
   // If list, take first
   if (ip.includes(",")) {
     ip = ip.split(",")[0];

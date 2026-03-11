@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { updateSession } from "@/utils/supabase/middleware"
 import { createClient } from "@supabase/supabase-js"
 
+export const runtime = 'edge';
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -21,7 +23,7 @@ export async function proxy(request: NextRequest) {
   // Formatting Utility
   function formatSafeIP(rawIP: string | null): string {
     if (!rawIP) return "Unknown IP";
-    let ip = rawIP;
+    let ip = String(rawIP); // Force type-safety explicitly against null bindings causing crashes
     if (ip.includes(",")) {
       ip = ip.split(",")[0];
     }

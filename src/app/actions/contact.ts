@@ -5,6 +5,7 @@ import { ContactFormSchema } from "@/types";
 import { revalidatePath } from "next/cache";
 import { getIPAddress, blockIPAddress } from "@/app/actions/logs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { headers } from "next/headers";
 
 export async function submitContactForm(prevState: any, formData: FormData) {
   const data = Object.fromEntries(formData.entries());
@@ -27,6 +28,17 @@ export async function submitContactForm(prevState: any, formData: FormData) {
     
     // 0. The Honeypot Trap: Verify if bot triggered the secret trap.
     if (data.website_url_verification && data.website_url_verification !== "") {
+      const headersList = await headers();
+      const userAgent = headersList.get("user-agent") || "Unknown User-Agent";
+      
+      // Log the honeypot capture explicitly for the Hall of Shame
+      await supabaseAdmin.from("activity_logs").insert({
+        action: "HONEYPOT_TRIGGERED",
+        details: `Honeypot Trap triggered by bot. IP: ${ip} | User-Agent: ${userAgent}`,
+        admin_email: "System/Security",
+      });
+
+      // Execute permanent ban
       await blockIPAddress(ip, "Honeypot Triggered: Automated Bot Detection", "permanent");
       return { success: false, error: "Akses ditolak karena aktivitas otomatis. IP Anda telah diblokir secara permanen." };
     }

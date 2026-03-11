@@ -8,15 +8,27 @@ const supabaseAdmin = createClient(
 );
 
 export async function middleware(request: NextRequest) {
+  console.log("--- SECURITY DEBUG START ---");
+  console.log("All Headers:", JSON.stringify(Object.fromEntries(request.headers.entries())));
+  console.log("--- SECURITY DEBUG END ---");
+
   // Quick bypass for static assets to avoid unnecessary DB queries
   const path = request.nextUrl.pathname;
   if (path.startsWith('/_next/') || path.includes('.')) {
     return await updateSession(request);
   }
 
-  // 1. Extract IP Address
-  let ip = request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for') ?? 'Unknown';
-  if (ip.includes(',')) ip = ip.split(',')[0].trim();
+  // 1. Extract IP Address securely
+  let ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'Unknown';
+  if (ip.includes(',')) {
+    ip = ip.split(',')[0];
+  }
+  ip = ip.trim();
+  
+  // Normalize IPv4-mapped IPv6 address
+  if (ip.startsWith('::ffff:')) {
+    ip = ip.substring(7);
+  }
 
   // 2. IP Shield - Check if IP is actively blocked and not expired
   const nowIso = new Date().toISOString();
@@ -30,7 +42,7 @@ export async function middleware(request: NextRequest) {
   if (blocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
     url.pathname = '/banned';
-    return NextResponse.redirect(url);
+    return NextResponse.rewrite(url);
   }
 
   // 3. Visitor Logger (Exclude admin and auth routes)

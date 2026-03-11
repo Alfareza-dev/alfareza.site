@@ -17,6 +17,25 @@ export async function getIPAddress() {
   }
 }
 
+// IP Intelligence Utility for Geofencing
+// We use ip-api.com temporarily as it does not require a key.
+export async function fetchIPGeolocation(ip: string) {
+  // Skip local and unknown networks
+  if (ip === "Unknown IP" || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return null;
+
+  try {
+    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,city,isp,lat,lon`);
+    const data = await response.json();
+    if (data.status === "success") {
+      return data; // returns { country, city, isp, lat, lon }
+    }
+    return null;
+  } catch (error) {
+    console.error(`Failed to geolocate IP [${ip}]:`, error);
+    return null;
+  }
+}
+
 export async function createLog(action: string, details: string, emailFallback?: string) {
   const supabase = await createClient();
 
@@ -35,9 +54,15 @@ export async function createLog(action: string, details: string, emailFallback?:
   const admin_email = user?.email || emailFallback || "System/Pending Auth";
   
   let finalDetails = details;
+  let geodata = null;
+
   if (action === "ADMIN_LOGIN" || action === "ADMIN_LOGOUT") {
     const ip = await getIPAddress();
     finalDetails = `${details} (IP: ${ip})`;
+    // Optionally fetch geodata for every admin login
+    if (action === "ADMIN_LOGIN") {
+       geodata = await fetchIPGeolocation(ip);
+    }
   }
 
   // Use the admin client (Service Role) to confidently bypass RLS and insert the log securely
@@ -47,6 +72,13 @@ export async function createLog(action: string, details: string, emailFallback?:
       action,
       details: finalDetails,
       admin_email,
+      ...(geodata && {
+        country: geodata.country,
+        city: geodata.city,
+        isp: geodata.isp,
+        lat: geodata.lat,
+        lon: geodata.lon,
+      }),
     });
 
   if (insertError) {
@@ -71,6 +103,9 @@ export async function logFailedLogin(emailAttempt: string) {
   // > 5 failures means 6th attempt triggers critical
   const actionName = failureCount >= 5 ? "SECURITY_ALERT_CRITICAL" : "LOGIN_FAILURE";
   const details = `Failed login attempt from IP: ${ip}. Username: ${emailAttempt}`;
+  
+  // Bind Geofencing intelligence against hostile login sources
+  const geodata = await fetchIPGeolocation(ip);
 
   const { error: insertError } = await supabaseAdmin
     .from("activity_logs")
@@ -78,6 +113,13 @@ export async function logFailedLogin(emailAttempt: string) {
       action: actionName,
       details,
       admin_email: "System/Security",
+      ...(geodata && {
+        country: geodata.country,
+        city: geodata.city,
+        isp: geodata.isp,
+        lat: geodata.lat,
+        lon: geodata.lon,
+      }),
     });
 
   if (insertError) {
@@ -104,10 +146,24 @@ export async function blockIPAddress(
     expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   }
 
+  // Execute the Geolocation trap to deeply trace the attacker
+  const geodata = await fetchIPGeolocation(ip);
+
   // Attempt to insert into blocked_ips
   const { error: blockError } = await supabaseAdmin
     .from("blocked_ips")
-    .insert({ ip, reason, expires_at: expiresAt });
+    .insert({ 
+      ip, 
+      reason, 
+      expires_at: expiresAt,
+      ...(geodata && {
+        country: geodata.country,
+        city: geodata.city,
+        isp: geodata.isp,
+        lat: geodata.lat,
+        lon: geodata.lon,
+      })
+    });
 
   // Handle unique violation (Postgres error code '23505')
   if (blockError) {
@@ -118,13 +174,20 @@ export async function blockIPAddress(
     return { success: false, message: "Failed to block IP due to a server error." };
   }
 
-  // Create log in activity logs
+  // Create explicit trace block in activity logs identically bound
   await supabaseAdmin
     .from("activity_logs")
     .insert({
       action: "IP_BANNED",
       details: `IP Address Blocked: ${ip}. Reason: ${reason}`,
       admin_email: user?.email || "System/Security",
+      ...(geodata && {
+        country: geodata.country,
+        city: geodata.city,
+        isp: geodata.isp,
+        lat: geodata.lat,
+        lon: geodata.lon,
+      })
     });
     
   return { success: true, message: "IP successfully blocked." };

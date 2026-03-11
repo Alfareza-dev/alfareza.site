@@ -7,7 +7,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   console.log("--- SECURITY DEBUG START ---");
   console.log("All Headers:", JSON.stringify(Object.fromEntries(request.headers.entries())));
   console.log("--- SECURITY DEBUG END ---");
@@ -98,6 +98,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 }

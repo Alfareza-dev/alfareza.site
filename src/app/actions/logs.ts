@@ -195,7 +195,7 @@ export async function blockIPAddress(
   // Execute the Geolocation trap to deeply trace the attacker
   const geodata = await fetchIPGeolocation(sanitizedIp);
 
-  console.log("ATTEMPTING AUTO-BLOCK FOR:", sanitizedIp);
+  console.log("--- INITIATING DATABASE UPSERT FOR IP:", sanitizedIp);
   const headersList = await headers();
   // Attempt to insert into blocked_ips
   const { data, error } = await supabaseAdmin
@@ -206,19 +206,19 @@ export async function blockIPAddress(
       expires_at: expiresAt,
       country: headersList.get('x-vercel-ip-country'),
       city: headersList.get('x-vercel-ip-city'),
-      isp: geodata?.isp || "Detected Provider", // Nama ISP sebenarnya
+      isp: geodata?.isp || "Detected Provider",
       lat: parseFloat(headersList.get('x-vercel-ip-latitude') || '0'),
       lon: parseFloat(headersList.get('x-vercel-ip-longitude') || '0')
     }, { onConflict: 'ip' })
     .select();
 
   if (error) {
-    console.error("[DATABASE FATAL] Upsert failed:", error.message, error.code);
-    throw new Error(error.message);
+    console.error("[DATABASE FATAL] Upsert failed:", error.message, "Code:", error.code);
+    throw new Error(`DB Write Failed: ${error.message}`);
   }
 
   // Explicit Success Trace
-  console.log("[DATABASE SUCCESS] IP locked in DB:", sanitizedIp);
+  console.log("[DATABASE SUCCESS] IP Locked in Table:", sanitizedIp, data);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin

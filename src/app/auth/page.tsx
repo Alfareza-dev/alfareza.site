@@ -27,9 +27,15 @@ export default function LoginPage() {
     if (error) {
       setErrorMsg(error.message);
       setLoading(false);
+      
+      const { logFailedLogin } = await import("@/app/actions/logs");
+      await logFailedLogin(email);
     } else {
-      router.push("/admin");
+      const { createLog } = await import("@/app/actions/logs");
+      await createLog("ADMIN_LOGIN", "Admin logged in successfully", email);
+
       router.refresh();
+      router.push("/admin");
     }
   };
 

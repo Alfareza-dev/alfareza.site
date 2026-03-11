@@ -43,6 +43,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create post", details: insertError }, { status: 500 });
     }
 
+    const { createLog } = await import("@/app/actions/logs");
+    await createLog("POST_CREATED", `Created new post: ${validatedData.data.title}`);
+
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error("API error:", error);
@@ -89,6 +92,9 @@ export async function PUT(request: Request) {
       console.error("Exact Supabase Update Error:", JSON.stringify(updateError, null, 2));
       return NextResponse.json({ error: "Failed to update post", details: updateError }, { status: 500 });
     }
+
+    const { createLog } = await import("@/app/actions/logs");
+    await createLog("POST_UPDATED", `Updated post: ${validatedData.data.title}`);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

@@ -49,11 +49,19 @@ export async function submitContactForm(prevState: any, formData: FormData) {
 export async function deleteMessage(id: string) {
   const supabase = await createClient();
 
-  // Validate admin token presence
+  // Validate admin token presence and role
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+  if (error || !user || user.user_metadata?.role !== "ADMIN") {
+    console.error("Unauthorized access to delete message. Account:", user?.email || "Unknown");
     return { success: false, error: "Unauthorized access" };
   }
+
+  // Get message details for the log before deleting
+  const { data: messageToLog } = await supabase
+    .from("messages")
+    .select("full_name")
+    .eq("id", id)
+    .single();
 
   const { error: deleteError } = await supabase
     .from("messages")
@@ -63,6 +71,12 @@ export async function deleteMessage(id: string) {
   if (deleteError) {
     console.error("Exact Supabase Delete Error:", JSON.stringify(deleteError, null, 2));
     return { success: false, error: "Failed to delete message." };
+  }
+
+  // Log the deletion
+  if (messageToLog) {
+    const { createLog } = await import("@/app/actions/logs");
+    await createLog("MESSAGE_DELETED", `Deleted message from ${messageToLog.full_name}`);
   }
 
   revalidatePath("/admin/messages");

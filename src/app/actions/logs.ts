@@ -213,7 +213,7 @@ export async function blockIPAddress(
     .select();
 
   if (error) {
-    console.error("[DATABASE FATAL] Upsert failed:", error.message);
+    console.error("[DATABASE FATAL] Upsert failed:", error.message, error.code);
     throw new Error(error.message);
   }
 

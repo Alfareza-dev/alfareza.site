@@ -28,6 +28,7 @@ export async function proxy(request: NextRequest) {
   let isBlocked = false;
 
   try {
+    console.log("Proxy checking DB for IP:", sanitizedIp);
     // Explicit REST Fetch to guarantee cache bust at the Edge
     const blockCheckResponse = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip=eq.${sanitizedIp}&select=id,expires_at`,

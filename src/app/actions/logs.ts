@@ -176,8 +176,10 @@ export async function blockIPAddress(
   const sanitizedIp = formatSafeIP(rawIp);
   const supabase = await createClient();
 
+  console.log("--- STARTING DB WRITE FOR IP:", sanitizedIp);
+
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("MISSING SERVICE ROLE KEY!");
+    console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY is MISSING in Production!");
   }
 
   // Validate user login
@@ -195,30 +197,32 @@ export async function blockIPAddress(
   // Execute the Geolocation trap to deeply trace the attacker
   const geodata = await fetchIPGeolocation(sanitizedIp);
 
-  console.log("--- INITIATING DATABASE UPSERT FOR IP:", sanitizedIp);
   const headersList = await headers();
   // Attempt to insert into blocked_ips
-  const { data, error } = await supabaseAdmin
+  const { data, error: dbError } = await supabaseAdmin
     .from('blocked_ips')
     .upsert({ 
       ip: sanitizedIp, 
-      reason: reason || "Auto-blocked: 5+ failed attempts",
+      reason: reason || "Auto-blocked: 5+ failed login attempts",
       expires_at: expiresAt,
-      country: headersList.get('x-vercel-ip-country'),
-      city: headersList.get('x-vercel-ip-city'),
+      country: headersList.get('x-vercel-ip-country') || 'Unknown',
+      city: headersList.get('x-vercel-ip-city') || 'Unknown',
       isp: geodata?.isp || "Detected Provider",
       lat: parseFloat(headersList.get('x-vercel-ip-latitude') || '0'),
       lon: parseFloat(headersList.get('x-vercel-ip-longitude') || '0')
     }, { onConflict: 'ip' })
     .select();
 
-  if (error) {
-    console.error("[DATABASE FATAL] Upsert failed:", error.message, "Code:", error.code);
-    throw new Error(`DB Write Failed: ${error.message}`);
-  }
+  if (dbError) {
+    console.error("--- DATABASE WRITE FAILED ---");
+    console.error("Error Code:", dbError.code);
+    console.error("Error Message:", dbError.message);
+    console.error("Details:", dbError.details);
+    throw new Error(`DB Write Failed: ${dbError.message}`);
+  } 
 
-  // Explicit Success Trace
-  console.log("[DATABASE SUCCESS] IP Locked in Table:", sanitizedIp, data);
+  console.log("--- DATABASE WRITE SUCCESS ---");
+  console.log("Data Saved:", data);
 
   // Create explicit trace block in activity logs identically bound
   await supabaseAdmin

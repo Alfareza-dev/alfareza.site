@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alfareza Personal Portfolio
 
-## Getting Started
+A premium portfolio built with Next.js, Supabase, and Vercel Edge.
 
-First, run the development server:
+## 🛡️ Advanced Security Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This project features a production-grade security system designed to prevent unauthorized access and mitigate brute-force attacks at the Edge.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. Auto-Ban System
+- **5-Strike Enforcement**: Automated bot detection that blacklists any IP address failing 5+ login attempts within 10 minutes.
+- **Service Role Bypass**: Uses `supabaseAdmin` with the `SERVICE_ROLE_KEY` to bypass RLS and guarantee security writes even when the public API is locked.
+- **Nuclear IP Sanitization**: Strictly sanitizes all incoming headers to prevent IP-injection and removes trailing residuals (dots/spaces).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Edge Proxy Protection (`proxy.ts`)
+- **Real-time Shield**: Every request headers are intercepted at the Edge and checked against the `blocked_ips` table in Supabase.
+- **Cache-Busting Fetch**: Uses a custom fetch implementation with `cache: 'no-store'` and `Pragma: no-cache` to ensure bans are reflected instantly without Edge caching "hang".
+- **Intimidating Redirect**: Blocked users are forcefully rewritten to `/banned` with localized geolocation telemetry.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Admin Security Center
+- **Real-time Monitoring**: Glassmorphic dashboard displaying live attack origins, failure logs, and honeypot triggers.
+- **Manual Control**: Administrators can manually override or block suspicious IPs directly from the UI.
+- **Trace Sequentiality**: All security actions follow a strict `await` chain to ensure database consistency before UI revalidation.
 
-## Learn More
+## 🚀 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository**
+2. **Install dependencies**: `npm install`
+3. **Set up Environment Variables**:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=your_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+   SUPABASE_SERVICE_ROLE_KEY=your_key_keep_secret
+   ```
+4. **Run development**: `npm run dev`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Deploy to **Vercel** for the Edge Proxy features to function correctly.
+- Ensure `SUPABASE_SERVICE_ROLE_KEY` is added to Vercel Environment Variables.
+- Execute SQL artifacts in `/brain/` in your Supabase SQL Editor to initialize schemas and RLS bypasses.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

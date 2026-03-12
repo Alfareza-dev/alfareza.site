@@ -155,16 +155,18 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
       }
 
       // Await the block and dynamically reload Admin panels
-      await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+      const blockSuccessful = await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
       
-      // UI force-revalidation happens within blockIPAddress after DB confirms write success
-      return { isBanned: true };
+      console.log(`[SECURITY] Auto-Ban persistent status: ${blockSuccessful}`);
+      
+      // Return isBanned only after confirmed DB write
+      return { isBanned: blockSuccessful };
     }
     
     return { isBanned: false };
   } catch (err) {
     console.error(`[SECURITY] FATAL Auto-Ban sequence failed:`, err);
-    return { isBanned: false }; // Fail silently to client, leave alert in Vercel logs
+    return { isBanned: false }; 
   }
 }
 
@@ -172,20 +174,21 @@ export async function blockIPAddress(
   rawIp: string, 
   reason: string = "Manual block triggered by Administrator",
   duration: "24h" | "permanent" = "24h"
-) {
+): Promise<boolean> {
   const sanitizedIp = formatSafeIP(rawIp);
   const supabase = await createClient();
 
-  console.log("--- STARTING DB WRITE FOR IP:", sanitizedIp);
+  console.log("--- ATTEMPTING DB UPSERT ---");
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY is MISSING in Production!");
+    console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY is MISSING!");
   }
 
   // Validate user login
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.email !== "alfareza.dev@gmail.com" && reason !== "Honeypot Triggered: Automated Bot Detection" && !reason.includes("Rate Limit Exceeded")) {
-    return { success: false, message: "Unauthorized to block IPs." };
+    console.error("Unauthorized block attempt for IP:", sanitizedIp);
+    return false;
   }
 
   // Calculate explicit expiry
@@ -194,16 +197,16 @@ export async function blockIPAddress(
     expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   }
 
-  // Execute the Geolocation trap to deeply trace the attacker
+  // Execute the Geolocation trap
   const geodata = await fetchIPGeolocation(sanitizedIp);
-
   const headersList = await headers();
-  // Attempt to insert into blocked_ips
+
+  // 1. Perform the Upsert and CONFIRM with select()
   const { data, error: dbError } = await supabaseAdmin
     .from('blocked_ips')
     .upsert({ 
       ip: sanitizedIp, 
-      reason: reason || "Auto-blocked: 5+ failed login attempts",
+      reason: reason || "Auto-blocked: 5+ failed attempts",
       expires_at: expiresAt,
       country: headersList.get('x-vercel-ip-country') || 'Unknown',
       city: headersList.get('x-vercel-ip-city') || 'Unknown',
@@ -214,17 +217,13 @@ export async function blockIPAddress(
     .select();
 
   if (dbError) {
-    console.error("--- DATABASE WRITE FAILED ---");
-    console.error("Error Code:", dbError.code);
-    console.error("Error Message:", dbError.message);
-    console.error("Details:", dbError.details);
-    throw new Error(`DB Write Failed: ${dbError.message}`);
+    console.error("DB UPSERT FAILED:", dbError.message, dbError.code);
+    return false;
   } 
 
-  console.log("--- DATABASE WRITE SUCCESS ---");
-  console.log("Data Saved:", data);
+  console.log("DB UPSERT CONFIRMED:", data);
 
-  // Create explicit trace block in activity logs identically bound
+  // 2. Log the ban event in activity_logs (sequential)
   await supabaseAdmin
     .from("activity_logs")
     .insert({
@@ -240,11 +239,11 @@ export async function blockIPAddress(
       isp: sanitizedIp,
     });
     
-  // Explicitly sync the cache only on perfect db confirmation execution bounds
-  revalidatePath('/admin');
-  revalidatePath('/admin/security');
+  // 3. Await revalidation to ensure sync before returning
+  await revalidatePath('/admin');
+  await revalidatePath('/admin/security');
   
-  return { success: true, message: "IP successfully blocked." };
+  return true;
 }
 
 

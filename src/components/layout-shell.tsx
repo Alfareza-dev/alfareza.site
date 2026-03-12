@@ -138,6 +138,8 @@ export function Footer() {
           <Link href="/auth" className="hover:text-white transition-colors">Admin Login</Link>
         )}
       </div>
+      {/* Honeypot Bait — Invisible to humans, crawled by bots */}
+      <a href="/api/honeypot" rel="nofollow" aria-hidden="true" tabIndex={-1} style={{ display: 'none' }}>Admin Panel</a>
     </footer>
   );
 }

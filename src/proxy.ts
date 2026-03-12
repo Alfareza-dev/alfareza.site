@@ -8,15 +8,39 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function proxy(request: NextRequest) {
-  console.log("--- SECURITY DEBUG START ---");
-  console.log("All Headers:", JSON.stringify(Object.fromEntries(request.headers.entries())));
-  console.log("--- SECURITY DEBUG END ---");
+// Common attacker probe paths — silently redirect all to the honeypot
+const HONEYPOT_ROUTES = [
+  '/.env',
+  '/.env.local',
+  '/.env.production',
+  '/wp-login.php',
+  '/wp-admin',
+  '/wp-config.php',
+  '/admin.php',
+  '/phpmyadmin',
+  '/.git/config',
+  '/xmlrpc.php',
+  '/config.php',
+  '/setup.php',
+  '/install.php',
+  '/shell.php',
+  '/backup.zip',
+  '/db.sql',
+];
 
+export async function proxy(request: NextRequest) {
   // Quick bypass for static assets to avoid unnecessary DB queries
   const path = request.nextUrl.pathname;
-  if (path.startsWith('/_next/') || path.includes('.')) {
+  if (path.startsWith('/_next/') || path.includes('.') && !HONEYPOT_ROUTES.includes(path)) {
     return await updateSession(request);
+  }
+
+  // 0. HONEYPOT: Silently catch known attacker probe paths
+  if (HONEYPOT_ROUTES.some(route => path === route || path.startsWith(route + '/'))) {
+    console.log(`[HONEYPOT] Probe detected on path: ${path}`);
+    const url = request.nextUrl.clone();
+    url.pathname = '/api/honeypot';
+    return NextResponse.rewrite(url);
   }
 
   // 1. Extract IP Address securely

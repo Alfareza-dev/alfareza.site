@@ -155,7 +155,7 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
       }
 
       // Await the block and dynamically reload Admin panels
-      const res = await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+      const res = await blockIPAddress(sanitizedIp, "Auto-blocked: 5+ failed login attempts", "24h", true);
       
       console.log(`[SECURITY] Auto-Ban persistent status: ${res.success}`);
       
@@ -173,22 +173,29 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
 export async function blockIPAddress(
   rawIp: string, 
   reason: string = "Manual block triggered by Administrator",
-  duration: "24h" | "permanent" = "24h"
+  duration: "24h" | "permanent" = "24h",
+  isSystemAction: boolean = false
 ): Promise<{ success: boolean; message?: string }> {
   const sanitizedIp = formatSafeIP(rawIp);
-  const supabase = await createClient();
-
-  console.log("--- ATTEMPTING DB UPSERT ---");
+  console.log("--- ATTEMPTING DB UPSERT (System Authority: " + isSystemAction + ") ---");
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY is MISSING!");
   }
 
-  // Validate user login
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user?.email !== "alfareza.dev@gmail.com" && reason !== "Honeypot Triggered: Automated Bot Detection" && !reason.includes("Rate Limit Exceeded")) {
-    console.error("Unauthorized block attempt for IP:", sanitizedIp);
-    return { success: false, message: "Unauthorized to block IPs." };
+  const supabase = await createClient();
+
+  // 1. Authorization Check (Bypass if system action)
+  let adminEmail = "System/Security";
+  
+  if (!isSystemAction) {
+    // Validate user login for manual actions
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email !== "alfareza.dev@gmail.com") {
+      console.error("Unauthorized manual block attempt for IP:", sanitizedIp);
+      return { success: false, message: "Unauthorized to block IPs manually." };
+    }
+    adminEmail = user.email;
   }
 
   // Calculate explicit expiry
@@ -229,7 +236,7 @@ export async function blockIPAddress(
     .insert({
       action: "IP_BANNED",
       details: `IP Address Blocked: ${sanitizedIp}. Reason: ${reason}`,
-      admin_email: user?.email || "System/Security",
+      admin_email: adminEmail,
       ...(geodata && {
         country: geodata.country,
         city: geodata.city,

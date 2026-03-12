@@ -155,12 +155,12 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
       }
 
       // Await the block and dynamically reload Admin panels
-      const blockSuccessful = await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
+      const res = await blockIPAddress(sanitizedIp, "Auto-blocked: Multiple failed login attempts (>5 in 10 minutes)", "24h");
       
-      console.log(`[SECURITY] Auto-Ban persistent status: ${blockSuccessful}`);
+      console.log(`[SECURITY] Auto-Ban persistent status: ${res.success}`);
       
       // Return isBanned only after confirmed DB write
-      return { isBanned: blockSuccessful };
+      return { isBanned: res.success };
     }
     
     return { isBanned: false };
@@ -174,7 +174,7 @@ export async function blockIPAddress(
   rawIp: string, 
   reason: string = "Manual block triggered by Administrator",
   duration: "24h" | "permanent" = "24h"
-): Promise<boolean> {
+): Promise<{ success: boolean; message?: string }> {
   const sanitizedIp = formatSafeIP(rawIp);
   const supabase = await createClient();
 
@@ -188,7 +188,7 @@ export async function blockIPAddress(
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.email !== "alfareza.dev@gmail.com" && reason !== "Honeypot Triggered: Automated Bot Detection" && !reason.includes("Rate Limit Exceeded")) {
     console.error("Unauthorized block attempt for IP:", sanitizedIp);
-    return false;
+    return { success: false, message: "Unauthorized to block IPs." };
   }
 
   // Calculate explicit expiry
@@ -218,7 +218,7 @@ export async function blockIPAddress(
 
   if (dbError) {
     console.error("DB UPSERT FAILED:", dbError.message, dbError.code);
-    return false;
+    return { success: false, message: dbError.message };
   } 
 
   console.log("DB UPSERT CONFIRMED:", data);
@@ -243,7 +243,7 @@ export async function blockIPAddress(
   await revalidatePath('/admin');
   await revalidatePath('/admin/security');
   
-  return true;
+  return { success: true };
 }
 
 

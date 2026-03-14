@@ -12,7 +12,7 @@ export const PurpleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "group relative inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-purple-600 text-sm font-medium text-white transition-all hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)]",
+          "group relative inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-teal-600 text-sm font-medium text-white transition-all hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden shadow-[0_0_15px_rgba(4,128,146,0.3)] hover:shadow-[0_0_25px_rgba(4,128,146,0.5)]",
           className
         )}
         {...props}

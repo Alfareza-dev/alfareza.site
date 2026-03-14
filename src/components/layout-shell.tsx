@@ -37,7 +37,7 @@ export function Header() {
     <header className="w-full sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md z-40 border-b border-white/5">
       <div className="max-w-5xl mx-auto flex items-center justify-between p-6">
         <Link href="/" className="font-bold text-xl tracking-tighter text-white flex items-baseline">
-          Alfareza<span className="text-cyan-400 font-black">.</span>
+          Alfareza<span className="text-teal-400 font-black">.</span>
         </Link>
         
         {/* Desktop Navigation */}
@@ -93,7 +93,7 @@ export function Header() {
                     key={link.name} 
                     href={link.href} 
                     onClick={() => setIsOpen(false)}
-                    className="text-3xl md:text-5xl font-bold tracking-tight text-white hover:text-purple-400 transition-colors font-sans"
+                    className="text-3xl md:text-5xl font-bold tracking-tight text-white hover:text-teal-400 transition-colors font-sans"
                   >
                     {link.name}
                   </Link>

@@ -13,8 +13,8 @@ export function HeroSection() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="flex flex-col items-center text-center z-10 space-y-6"
       >
-        <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-purple-200/80 backdrop-blur-md mb-4">
-          <span className="flex h-2 w-2 rounded-full bg-cyan-500 mr-2 animate-pulse"></span>
+        <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-teal-200/80 backdrop-blur-md mb-4">
+          <span className="flex h-2 w-2 rounded-full bg-teal-500 mr-2 animate-pulse"></span>
           Available for new opportunities
         </div>
         
@@ -23,7 +23,7 @@ export function HeroSection() {
           <motion.span 
             animate={{ opacity: [1, 0] }} 
             transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-            className="w-[4px] md:w-[8px] h-[30px] md:h-[70px] bg-cyan-400 ml-2"
+            className="w-[4px] md:w-[8px] h-[30px] md:h-[70px] bg-teal-400 ml-2"
           />
         </h1>
         

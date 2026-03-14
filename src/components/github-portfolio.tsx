@@ -52,14 +52,14 @@ export function GithubPortfolio({ repos }: { repos: GithubRepo[] }) {
           href={repo.html_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative flex flex-col justify-between p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/[0.08] transition-all duration-300 ease-in-out hover:border-purple-500/30 overflow-hidden"
+          className="group relative flex flex-col justify-between p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/[0.08] transition-all duration-300 ease-in-out hover:border-teal-500/30 overflow-hidden"
         >
           {/* Subtle gradient hover effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           <div className="flex flex-col z-10">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="font-semibold text-lg tracking-tight group-hover:text-purple-400 transition-colors">
+              <h3 className="font-semibold text-lg tracking-tight group-hover:text-teal-400 transition-colors">
                 {repo.name}
               </h3>
               <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0" />
@@ -73,7 +73,7 @@ export function GithubPortfolio({ repos }: { repos: GithubRepo[] }) {
           <div className="flex items-center gap-4 text-xs text-muted-foreground z-10">
             {repo.language && (
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500/80"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-teal-500/80"></span>
                 <span>{repo.language}</span>
               </div>
             )}

@@ -81,16 +81,49 @@ export async function proxy(request: NextRequest) {
 
   console.log("Checking Sanitized IP:", sanitizedIp, "| Match Found:", isBlocked);
 
+  // Priority 1: BANNED — If IP is blocked, force /banned immediately
   if (isBlocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
     url.pathname = '/banned';
     return NextResponse.rewrite(url);
   }
 
-  // 3. Visitor Logger (Exclude admin and auth routes)
-  if (!path.startsWith('/admin') && !path.startsWith('/auth') && !path.startsWith('/banned')) {
+  // Priority 2: ADMIN BYPASS — Always allow /auth, /admin, /banned, /maintenance through
+  const bypassRoutes = ['/auth', '/admin', '/banned', '/maintenance', '/api'];
+  const isBypassRoute = bypassRoutes.some(route => path.startsWith(route));
+
+  // Priority 3: MAINTENANCE MODE — Check site_settings table
+  if (!isBypassRoute) {
+    try {
+      const maintenanceRes = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/site_settings?key=eq.maintenance_mode&select=value`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+            Pragma: 'no-cache',
+          },
+          cache: 'no-store',
+        }
+      );
+
+      if (maintenanceRes.ok) {
+        const settings = await maintenanceRes.json();
+        if (settings?.[0]?.value === 'true') {
+          console.log(`[MAINTENANCE] Redirecting ${path} → /maintenance`);
+          const url = request.nextUrl.clone();
+          url.pathname = '/maintenance';
+          return NextResponse.rewrite(url);
+        }
+      }
+    } catch (e) {
+      console.error("[MAINTENANCE] Settings check failed:", e);
+    }
+  }
+
+  // 4. Visitor Logger (Exclude admin, auth, banned, maintenance routes)
+  if (!isBypassRoute && !path.startsWith('/banned')) {
     const userAgent = request.headers.get('user-agent') || 'Unknown';
-    // Fire the insert to track page views uniquely per hit
     await supabaseAdmin.from('visitor_stats').insert({
       path,
       ip_address: sanitizedIp,

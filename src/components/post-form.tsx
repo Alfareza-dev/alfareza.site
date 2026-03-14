@@ -63,7 +63,7 @@ export function PostForm({ post }: PostFormProps) {
             name="title"
             defaultValue={post?.title}
             required
-            className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500"
+            className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500"
             placeholder="Post Title"
           />
         </div>
@@ -74,7 +74,7 @@ export function PostForm({ post }: PostFormProps) {
             name="slug"
             defaultValue={post?.slug}
             required
-            className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500"
+            className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500"
             placeholder="post-url-slug"
           />
         </div>
@@ -86,7 +86,7 @@ export function PostForm({ post }: PostFormProps) {
           id="tags"
           name="tags"
           defaultValue={post?.tags?.join(", ")}
-          className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500"
+          className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500"
           placeholder="Nextjs, Tutorial, RPL"
         />
       </div>
@@ -97,7 +97,7 @@ export function PostForm({ post }: PostFormProps) {
           id="excerpt"
           name="excerpt"
           defaultValue={post?.excerpt || ""}
-          className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 resize-none"
+          className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 resize-none"
           placeholder="Short description of the post..."
         />
       </div>
@@ -110,7 +110,7 @@ export function PostForm({ post }: PostFormProps) {
               type="button"
               onClick={() => setActiveTab("write")}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                activeTab === "write" ? "bg-purple-600 text-white shadow" : "text-muted-foreground hover:text-white"
+                activeTab === "write" ? "bg-teal-600 text-white shadow" : "text-muted-foreground hover:text-white"
               }`}
             >
               Write
@@ -119,7 +119,7 @@ export function PostForm({ post }: PostFormProps) {
               type="button"
               onClick={() => setActiveTab("preview")}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                activeTab === "preview" ? "bg-purple-600 text-white shadow" : "text-muted-foreground hover:text-white"
+                activeTab === "preview" ? "bg-teal-600 text-white shadow" : "text-muted-foreground hover:text-white"
               }`}
             >
               Preview
@@ -141,7 +141,7 @@ export function PostForm({ post }: PostFormProps) {
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-full bg-transparent p-4 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 font-mono resize-none"
+                  className="w-full h-full bg-transparent p-4 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 font-mono resize-none"
                   placeholder="# Heading 1&#10;Write your markdown here..."
                 />
               </motion.div>
@@ -159,12 +159,12 @@ export function PostForm({ post }: PostFormProps) {
                     content.split("---").filter(section => section.trim()).map((section, index) => (
                       <div 
                         key={index} 
-                        className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-purple-500/30 transition-all duration-500 overflow-hidden"
+                        className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-teal-500/30 transition-all duration-500 overflow-hidden"
                       >
                         {/* Subtle purple glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         
-                        <div className="prose prose-invert prose-purple max-w-none relative z-10 font-sans prose-p:-tracking-tight prose-a:text-[#8b5cf6] prose-a:no-underline hover:prose-a:underline prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-code:text-purple-400">
+                        <div className="prose prose-invert prose-teal max-w-none relative z-10 font-sans prose-p:-tracking-tight prose-a:text-[#048092] prose-a:no-underline hover:prose-a:underline prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-code:text-teal-400">
                           <ReactMarkdown>{section}</ReactMarkdown>
                         </div>
                       </div>
@@ -186,7 +186,7 @@ export function PostForm({ post }: PostFormProps) {
           id="published"
           name="published"
           defaultChecked={post?.published}
-          className="rounded border-white/10 bg-white/5 text-purple-600 focus:ring-purple-500"
+          className="rounded border-white/10 bg-white/5 text-teal-600 focus:ring-teal-500"
         />
         <label htmlFor="published" className="text-sm font-medium">
           Publish this post

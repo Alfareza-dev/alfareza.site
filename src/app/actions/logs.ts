@@ -253,4 +253,63 @@ export async function blockIPAddress(
   return { success: true };
 }
 
+export async function unblockIPAddress(rawIp: string): Promise<{ success: boolean; message?: string }> {
+  const sanitizedIp = formatSafeIP(rawIp);
 
+  // Authorization check — only admin can unblock
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email !== "alfareza.dev@gmail.com") {
+    console.error("Unauthorized unblock attempt for IP:", sanitizedIp);
+    return { success: false, message: "Unauthorized" };
+  }
+
+  // Delete from blocked_ips
+  const { error: deleteError } = await supabaseAdmin
+    .from("blocked_ips")
+    .delete()
+    .eq("ip", sanitizedIp);
+
+  if (deleteError) {
+    console.error("[UNBLOCK] Delete failed:", deleteError.message);
+    return { success: false, message: deleteError.message };
+  }
+
+  console.log(`[UNBLOCK] IP ${sanitizedIp} removed from blocked_ips`);
+
+  // Log the unblock event
+  await supabaseAdmin
+    .from("activity_logs")
+    .insert({
+      action: "IP_UNBLOCKED",
+      details: `IP Address Unblocked: ${sanitizedIp} by ${user.email}`,
+      admin_email: user.email,
+      isp: sanitizedIp,
+    });
+
+  await revalidatePath("/admin");
+  await revalidatePath("/admin/security");
+
+  return { success: true };
+}
+
+export async function markAsRead(messageId: string): Promise<{ success: boolean; message?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email !== "alfareza.dev@gmail.com") {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("messages")
+    .update({ is_read: true })
+    .eq("id", messageId);
+
+  if (error) {
+    console.error("[MARK READ] Failed:", error.message);
+    return { success: false, message: error.message };
+  }
+
+  revalidatePath("/admin/messages");
+  return { success: true };
+}

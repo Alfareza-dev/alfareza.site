@@ -28,8 +28,7 @@
 <!-- Replace with actual screenshots -->
 | Admin Command Center | Sentinel Banned Page |
 |---|---|
-| ![Admin Dashboard Screenshot](./image/admin.png) 
-| ![Banned Radar Page Screenshot](./image/banned.png) |
+| ![Admin Dashboard Screenshot](./image/admin.png) | ![Banned Radar Page Screenshot](./image/banned.png) |
 
 ---
 

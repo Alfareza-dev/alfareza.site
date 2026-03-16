@@ -5,8 +5,13 @@ import { formatSafeIP } from "@/lib/security-utils";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { ClientMountedWrapper } from "@/components/admin/ClientMountedWrapper";
 import { PaginationControls } from "@/components/admin/PaginationControls";
+import { DynamicGeopoliticalMap } from "@/components/admin/DynamicGeopoliticalMap";
 
-export const dynamic = "force-dynamic";
+export const dynamicConfig = "force-dynamic";
+
+export const metadata = {
+  title: "Security Fortress",
+};
 
 const PAGE_SIZE = 5;
 
@@ -46,12 +51,16 @@ function decodeSafe(value: string | null | undefined): string {
 export default async function SecurityDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; hpPage?: string }>;
 }) {
   const params = await searchParams;
   const currentPage = Math.max(1, parseInt(params.page || "1", 10));
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
+  const currentHpPage = Math.max(1, parseInt(params.hpPage || "1", 10));
+  const hpFrom = (currentHpPage - 1) * PAGE_SIZE;
+  const hpTo = hpFrom + PAGE_SIZE - 1;
 
   const supabase = await createClient();
   const supabaseAdmin = (await import("@/lib/supabaseAdmin")).supabaseAdmin;
@@ -72,11 +81,12 @@ export default async function SecurityDashboard({
     .not("country", "is", null);
 
   // 3. Separate query for Honeypot Hall of Shame (all honeypot events, non-paginated)
-  const { data: honeypotAlerts } = await supabase
+  const { data: honeypotAlerts, count: honeypotCount } = await supabase
     .from("activity_logs")
-    .select("id, details, created_at")
+    .select("id, details, created_at", { count: "exact" })
     .eq("action", "HONEYPOT_TRIGGERED")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(hpFrom, hpTo);
 
   if (error) {
     console.error("Failed to fetch security logs:", error);
@@ -92,6 +102,7 @@ export default async function SecurityDashboard({
   }
 
   const totalPages = Math.ceil((count || 0) / PAGE_SIZE);
+  const totalHpPages = Math.ceil((honeypotCount || 0) / PAGE_SIZE);
 
   const extractIP = (details: string) => {
     const match = details.match(/IP: ([\d\.:a-fA-F]+)/);
@@ -221,6 +232,7 @@ export default async function SecurityDashboard({
           currentPage={currentPage}
           totalPages={totalPages}
           basePath="/admin/security"
+          extraParams={{ hpPage: String(currentHpPage) }}
         />
 
         {/* GEOPOLITICAL ATTACK ORIGIN — Always visible */}
@@ -234,32 +246,7 @@ export default async function SecurityDashboard({
             Live geofencing tracking active threats mapped to their geographic network sources.
           </p>
 
-          {Object.keys(countryCounts).length === 0 ? (
-            <div className="text-center p-8 bg-white/[0.02] border border-white/10 rounded-2xl">
-              <Info className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <p>No geographic threat telemetry captured yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(countryCounts).map(([countryName, threatCount]) => (
-                <div key={countryName} className="flex items-center justify-between bg-red-950/20 border border-red-500/20 rounded-xl p-5 shadow-lg shadow-red-900/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 text-red-400">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white">{countryName} {countryToFlag(countryName)}</h4>
-                      <span className="text-xs text-red-400 font-medium uppercase tracking-wider">Origin Source</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl font-bold text-red-500 leading-none">{threatCount}</span>
-                    <span className="text-[10px] text-muted-foreground mt-1">THREATS</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <DynamicGeopoliticalMap countryThreats={countryCounts} />
         </div>
 
         {/* HONEYPOT HALL OF SHAME — Always visible */}
@@ -279,32 +266,65 @@ export default async function SecurityDashboard({
               <p>No bots captured yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {honeypotAlerts.map((bot) => {
-                const ip = extractIP(bot.details);
-                const agentMatch = bot.details.match(/User-Agent: (.*)/);
-                const userAgent = agentMatch ? agentMatch[1] : "Unknown Agent";
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {honeypotAlerts.map((bot) => {
+                  const ip = extractIP(bot.details);
+                  const agentMatch = bot.details.match(/User-Agent: (.*)/);
+                  const userAgent = agentMatch ? agentMatch[1] : "Unknown Agent";
 
-                return (
-                  <div key={bot.id} className="bg-red-950/20 border border-red-500/20 rounded-xl p-5 hover:bg-red-950/30 transition-colors">
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="font-mono text-sm px-2 py-1 bg-red-500/10 text-red-400 rounded-md border border-red-500/20">
-                        {ip}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatWIB(bot.created_at)}
-                      </span>
+                  return (
+                    <div key={bot.id} className="bg-red-950/20 border border-red-500/20 rounded-xl p-5 hover:bg-red-950/30 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="font-mono text-sm px-2 py-1 bg-red-500/10 text-red-400 rounded-md border border-red-500/20">
+                          {ip}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatWIB(bot.created_at)}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">User-Agent Signature</h4>
+                        <p className="text-xs font-mono text-gray-300 break-words bg-black/40 p-2 rounded border border-white/5">
+                          {userAgent}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">User-Agent Signature</h4>
-                      <p className="text-xs font-mono text-gray-300 break-words bg-black/40 p-2 rounded border border-white/5">
-                        {userAgent}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+              
+              {/* Pagination for honeypot alerts */}
+              {totalHpPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <a
+                    href={`/admin/security?hpPage=${Math.max(1, currentHpPage - 1)}${currentPage > 1 ? `&page=${currentPage}` : ''}`}
+                    aria-disabled={currentHpPage <= 1}
+                    className={`px-4 py-2 text-sm font-medium rounded-md border ${
+                      currentHpPage <= 1
+                        ? "pointer-events-none opacity-50 border-white/5 text-muted-foreground bg-white/5"
+                        : "border-white/10 text-white bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+                    }`}
+                  >
+                    Previous
+                  </a>
+                  <span className="text-sm text-muted-foreground font-medium px-2">
+                    {currentHpPage} / {totalHpPages}
+                  </span>
+                  <a
+                    href={`/admin/security?hpPage=${Math.min(totalHpPages, currentHpPage + 1)}${currentPage > 1 ? `&page=${currentPage}` : ''}`}
+                    aria-disabled={currentHpPage >= totalHpPages}
+                    className={`px-4 py-2 text-sm font-medium rounded-md border ${
+                      currentHpPage >= totalHpPages
+                        ? "pointer-events-none opacity-50 border-white/5 text-muted-foreground bg-white/5"
+                        : "border-white/10 text-white bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+                    }`}
+                  >
+                    Next
+                  </a>
+                </div>
+              )}
+            </>
           )}
         </div>
       </ClientMountedWrapper>

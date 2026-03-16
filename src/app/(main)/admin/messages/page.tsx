@@ -8,6 +8,10 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: "Inbox",
+};
+
 const PAGE_SIZE = 10;
 
 type FilterType = "all" | "unread" | "read";

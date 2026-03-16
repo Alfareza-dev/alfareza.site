@@ -38,13 +38,13 @@ export function AdminHeader({ userEmail, hasCriticalAlert }: AdminHeaderProps) {
 
   return (
     <header className="border-b border-white/10 bg-white/[0.02]">
-      <div className="flex h-16 items-center px-6 max-w-6xl mx-auto justify-between">
+      <div className="flex h-16 items-center px-6 max-w-7xl mx-auto justify-between">
         {/* Left: Logo + Desktop Nav */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <Link href="/admin" className="font-bold text-lg tracking-tight shrink-0">
             Admin <span className="text-teal-500">Dashboard</span>
           </Link>
-          <nav className="hidden lg:flex items-center gap-4 text-sm font-medium">
+          <nav className="hidden lg:flex items-center gap-3 text-sm font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.name}

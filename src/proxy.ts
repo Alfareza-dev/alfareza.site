@@ -37,7 +37,6 @@ export async function proxy(request: NextRequest) {
 
   // 0. HONEYPOT: Silently catch known attacker probe paths
   if (HONEYPOT_ROUTES.some(route => path === route || path.startsWith(route + '/'))) {
-    console.log(`[HONEYPOT] Probe detected on path: ${path}`);
     const url = request.nextUrl.clone();
     url.pathname = '/api/honeypot';
     return NextResponse.rewrite(url);
@@ -52,7 +51,6 @@ export async function proxy(request: NextRequest) {
   let isBlocked = false;
 
   try {
-    console.log("Proxy checking DB for IP:", sanitizedIp);
     // Explicit REST Fetch to guarantee cache bust at the Edge
     const blockCheckResponse = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip=eq.${sanitizedIp}&select=id,expires_at`,
@@ -79,8 +77,6 @@ export async function proxy(request: NextRequest) {
     console.error("Middleware Cache-Bust Check Failed:", e);
   }
 
-  console.log("Checking Sanitized IP:", sanitizedIp, "| Match Found:", isBlocked);
-
   // Priority 1: BANNED — If IP is blocked, force /banned immediately
   if (isBlocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
@@ -101,16 +97,15 @@ export async function proxy(request: NextRequest) {
           headers: {
             apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
             Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
-            Pragma: 'no-cache',
           },
-          cache: 'no-store',
+          cache: 'force-cache',
+          next: { tags: ['site_settings'] },
         }
       );
 
       if (maintenanceRes.ok) {
         const settings = await maintenanceRes.json();
         if (settings?.[0]?.value === 'true') {
-          console.log(`[MAINTENANCE] Redirecting ${path} → /maintenance`);
           const url = request.nextUrl.clone();
           url.pathname = '/maintenance';
           return NextResponse.rewrite(url);
@@ -142,8 +137,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - public files (.png, .jpg, .jpeg, .svg, .webp)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }

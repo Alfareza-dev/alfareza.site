@@ -98,7 +98,6 @@ export async function submitContactForm(prevState: any, formData: FormData) {
 
   } else {
     // Development fallback if Supabase isn't configured yet
-    console.log("Mock message successfully sent:", validatedFields.data);
   }
 
   return {

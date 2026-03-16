@@ -8,6 +8,10 @@ import { getMaintenanceStatus } from "@/app/actions/settings";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Command Center",
+};
+
 export default async function AdminDashboardOverview() {
   const supabase = await createClient();
 

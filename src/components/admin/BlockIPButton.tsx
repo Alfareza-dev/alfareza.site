@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Ban, ShieldCheck } from "lucide-react";
 import { blockIPAddress, unblockIPAddress } from "@/app/actions/logs";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function BlockIPButton({ ip, initiallyBlocked = false }: { ip: string, initiallyBlocked?: boolean }) {
   const [isBlocked, setIsBlocked] = useState(initiallyBlocked);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+// ... Wait, I can just replace lines 13-47 ...
   async function handleBlock() {
     if (isBlocked) return;
     setIsLoading(true);
@@ -17,12 +19,13 @@ export function BlockIPButton({ ip, initiallyBlocked = false }: { ip: string, in
       const res = await blockIPAddress(ip);
       if (res.success) {
         setIsBlocked(true);
+        toast.success(`IP ${ip} blocked successfully`);
         router.refresh();
       } else {
-        console.error("Failed to block IP:", res.message);
+        toast.error(`Failed to block IP`);
       }
     } catch (e) {
-      console.error(e);
+      toast.error(`Error blocking IP`);
     } finally {
       setIsLoading(false);
     }
@@ -35,12 +38,13 @@ export function BlockIPButton({ ip, initiallyBlocked = false }: { ip: string, in
       const res = await unblockIPAddress(ip);
       if (res.success) {
         setIsBlocked(false);
+        toast.success(`IP ${ip} unblocked`);
         router.refresh();
       } else {
-        console.error("Failed to unblock IP:", res.message);
+        toast.error(`Failed to unblock IP`);
       }
     } catch (e) {
-      console.error(e);
+      toast.error(`Error unblocking IP`);
     } finally {
       setIsLoading(false);
     }

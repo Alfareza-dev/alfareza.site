@@ -2,7 +2,7 @@
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function toggleMaintenance(targetStatus: boolean): Promise<{ success: boolean; message?: string }> {
   // Authorization check
@@ -35,8 +35,8 @@ export async function toggleMaintenance(targetStatus: boolean): Promise<{ succes
       admin_email: user.email,
     });
 
-  revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin", "layout");
 
   return { success: true };
 }

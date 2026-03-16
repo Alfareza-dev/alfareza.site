@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { markAsRead } from "@/app/actions/logs";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function MarkAsReadButton({ messageId, isRead }: { messageId: string; isRead: boolean }) {
   const [done, setDone] = useState(isRead);
@@ -24,10 +25,13 @@ export function MarkAsReadButton({ messageId, isRead }: { messageId: string; isR
       const res = await markAsRead(messageId);
       if (res.success) {
         setDone(true);
+        toast.success("Message marked as read");
         router.refresh();
+      } else {
+        toast.error("Failed to mark message as read");
       }
     } catch (e) {
-      console.error(e);
+      toast.error("Error marking message as read");
     } finally {
       setIsLoading(false);
     }

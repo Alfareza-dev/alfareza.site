@@ -144,8 +144,6 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
 
     // 3. 5-STRIKE AUTO BLOCK EXECUTION
     if (failureCount >= 5) {
-      console.log(`[SECURITY] 5-Strike Auto-Ban Executed for IP: ${sanitizedIp}`);
-      
       // Upgrade the just-inserted log to CRITICAL instead
       if (insertedLog) {
         await supabaseAdmin
@@ -156,8 +154,6 @@ export async function logFailedLogin(emailAttempt: string): Promise<{ isBanned: 
 
       // Await the block and dynamically reload Admin panels
       const res = await blockIPAddress(sanitizedIp, "Auto-blocked: 5+ failed login attempts", "24h", true);
-      
-      console.log(`[SECURITY] Auto-Ban persistent status: ${res.success}`);
       
       // Return isBanned only after confirmed DB write
       return { isBanned: res.success };
@@ -177,7 +173,6 @@ export async function blockIPAddress(
   isSystemAction: boolean = false
 ): Promise<{ success: boolean; message?: string }> {
   const sanitizedIp = formatSafeIP(rawIp);
-  console.log("--- ATTEMPTING DB UPSERT (System Authority: " + isSystemAction + ") ---");
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY is MISSING!");
@@ -228,8 +223,6 @@ export async function blockIPAddress(
     return { success: false, message: dbError.message };
   } 
 
-  console.log("DB UPSERT CONFIRMED:", data);
-
   // 2. Log the ban event in activity_logs (sequential)
   await supabaseAdmin
     .from("activity_logs")
@@ -274,8 +267,6 @@ export async function unblockIPAddress(rawIp: string): Promise<{ success: boolea
     console.error("[UNBLOCK] Delete failed:", deleteError.message);
     return { success: false, message: deleteError.message };
   }
-
-  console.log(`[UNBLOCK] IP ${sanitizedIp} removed from blocked_ips`);
 
   // Log the unblock event
   await supabaseAdmin

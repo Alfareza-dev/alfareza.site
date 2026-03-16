@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Settings, AlertTriangle } from "lucide-react";
 import { toggleMaintenance } from "@/app/actions/settings";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean }) {
   const [isEnabled, setIsEnabled] = useState(initialStatus);
@@ -15,6 +16,7 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
     setShowModal(true);
   }
 
+//...
   async function handleConfirm() {
     setShowModal(false);
     setIsLoading(true);
@@ -22,12 +24,13 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
       const res = await toggleMaintenance(!isEnabled);
       if (res.success) {
         setIsEnabled(!isEnabled);
+        toast.success(`Maintenance mode ${!isEnabled ? "enabled" : "disabled"}`);
         router.refresh();
       } else {
-        console.error("Toggle failed:", res.message);
+        toast.error("Failed to toggle maintenance mode");
       }
     } catch (e) {
-      console.error(e);
+      toast.error("Error toggling maintenance mode");
     } finally {
       setIsLoading(false);
     }

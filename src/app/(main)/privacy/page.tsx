@@ -2,7 +2,7 @@ import { ShieldCheck, Database, Lock, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy | Alfareza",
+  title: "Privacy Policy",
   description: "Privacy Policy and Data Handling for Alfareza's personal site.",
 };
 

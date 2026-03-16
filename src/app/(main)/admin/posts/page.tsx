@@ -5,6 +5,10 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import { PurpleButton } from "@/components/purple-button";
 import { deletePost } from "@/app/actions/posts";
 
+export const metadata = {
+  title: "Blog Management",
+};
+
 export default async function AdminPosts() {
   const supabase = await createClient();
   

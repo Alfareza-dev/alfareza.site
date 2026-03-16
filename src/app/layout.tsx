@@ -1,13 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const roboto = Roboto({
   weight: ["400", "700"],
   variable: "--font-roboto",
   subsets: ["latin"],
+  display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: "#050a0c",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -15,15 +21,19 @@ export const metadata: Metadata = {
   ),
   title: {
     template: "%s | Alfareza",
-    default: "Alfareza",
+    default: "Personal Portfolio | Alfareza",
   },
-  description: "Personal portfolio of Alfareza, a Software Engineering (RPL) student focused on building modern web applications.",
+  description: "A passionate Software Engineering (RPL) student specializing in building high-performance web applications, modern UI/UX design, and integrated security systems.",
+  keywords: ["Alfareza", "Security Center", "Honeypot", "Portfolio", "Web Security", "Next.js", "Software Engineering", "React"],
   openGraph: {
-    images: ["/og-image.jpg"],
+    title: "Sites | Alfareza",
+    description: "Explore the projects and technical journey of Alfareza, a high school student focused on modern Software Engineering.",
+    images: ["/opengraph-image.png"],
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/og-image.jpg"],
+    images: ["/opengraph-image.png"],
   },
 };
 
@@ -44,6 +54,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster theme="dark" position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

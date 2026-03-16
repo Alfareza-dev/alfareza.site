@@ -4,6 +4,10 @@ import { PaginationControls } from "@/components/admin/PaginationControls";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Activity Logs",
+};
+
 const PAGE_SIZE = 5;
 
 function formatWIB(dateString: string): string {

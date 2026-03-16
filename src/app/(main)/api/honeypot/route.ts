@@ -17,10 +17,6 @@ async function trapAttacker(request: NextRequest) {
   const userAgent = request.headers.get("user-agent") || "Unknown Agent";
   const path = request.nextUrl.pathname;
 
-  console.log(
-    `[HONEYPOT] Trap triggered by IP: ${sanitizedIp} | Path: ${path} | Agent: ${userAgent}`
-  );
-
   // 1. Immediately ban the attacker PERMANENTLY using service role (bypass RLS)
   const { error: upsertError } = await supabaseAdmin
     .from("blocked_ips")
@@ -37,8 +33,6 @@ async function trapAttacker(request: NextRequest) {
 
   if (upsertError) {
     console.error("[HONEYPOT] Ban write failed:", upsertError.message);
-  } else {
-    console.log(`[HONEYPOT] IP ${sanitizedIp} successfully banned and added to Hall of Shame.`);
   }
 
   // 2. Log the honeypot event in activity_logs for Hall of Shame

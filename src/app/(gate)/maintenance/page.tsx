@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function MaintenancePage() {
   return (
-    <div className="fixed inset-0 bg-[#050a0c] z-[9999] flex items-center justify-center p-4 sm:p-6 font-sans overflow-auto">
+    <div className="fixed inset-0 bg-[#050a0c] z-[9999] flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
       {/* Deep teal background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#048092]/8 blur-[120px] rounded-full" />

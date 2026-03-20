@@ -12,7 +12,7 @@ export const metadata = {
   title: "Inbox",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 type FilterType = "all" | "unread" | "read";
 

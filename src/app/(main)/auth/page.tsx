@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 relative">
+    <div className="flex h-[100dvh] overflow-hidden items-center justify-center px-4 relative">
       <div className="absolute top-8 left-8">
         <Link href="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />

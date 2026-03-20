@@ -32,7 +32,7 @@ export default async function AdminLayout({
   const hasCriticalAlert = criticalLogs && criticalLogs.length > 0;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen max-w-full overflow-x-hidden">
       <AdminHeader
         userEmail={data.user.email || ""}
         hasCriticalAlert={!!hasCriticalAlert}

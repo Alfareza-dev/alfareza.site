@@ -34,7 +34,7 @@ export default async function BannedPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#050a0c] z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8 font-sans overflow-auto">
+    <div className="fixed inset-0 bg-[#050a0c] z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8 font-sans overflow-hidden">
       {/* Deep teal background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px] bg-[#048092]/10 blur-[120px] rounded-full" />

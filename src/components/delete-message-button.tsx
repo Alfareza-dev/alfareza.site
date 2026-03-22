@@ -23,33 +23,34 @@ export function DeleteMessageButton({ id }: { id: string }) {
   }
 
   return (
-    <div className="flex items-center">
-      <button
-        onClick={() => setShowConfirm(!showConfirm)}
-        disabled={isPending}
-        className={`p-2 rounded-md transition-colors ${
-          showConfirm 
-            ? "text-red-500 bg-red-500/5 hover:bg-red-500/10" 
-            : "text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
-        }`}
-        title="Delete Message"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
-      
-      <div 
-        className={`overflow-hidden transition-all duration-300 ease-in-out flex items-center ${
-          showConfirm ? "w-[72px] opacity-100 ml-2" : "w-0 opacity-0 ml-0"
-        }`}
-      >
+    <div className="flex items-center justify-end">
+      {!showConfirm ? (
         <button
-          onClick={handleDelete}
+          onClick={() => setShowConfirm(true)}
           disabled={isPending}
-          className="flex items-center justify-center w-full px-2 py-1.5 text-xs font-medium bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 transition-colors whitespace-nowrap"
+          className="p-1.5 rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
+          title="Delete Message"
         >
-          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirm"}
+          <Trash2 className="w-4 h-4" />
         </button>
-      </div>
+      ) : (
+        <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-right-2 duration-200">
+          <button
+            onClick={() => setShowConfirm(false)}
+            disabled={isPending}
+            className="px-2 py-1 text-xs text-muted-foreground hover:text-white rounded bg-white/5 hover:bg-white/10 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isPending}
+            className="px-2.5 py-1 text-xs font-medium bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50 transition-colors flex items-center justify-center min-w-[60px]"
+          >
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirm"}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -121,15 +121,15 @@ export default async function AdminMessagesPage({
                 )}
 
                 <div className={`flex justify-between items-start gap-4 mb-4 ${!msg.is_read ? "pl-4" : ""}`}>
-                  <div className="flex flex-col">
-                    <h3 className={`font-medium ${!msg.is_read ? "text-white font-semibold" : "text-white/70"}`}>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <h3 className={`font-medium truncate ${!msg.is_read ? "text-white font-semibold" : "text-white/70"}`}>
                       {msg.full_name}
                     </h3>
-                    <a href={`mailto:${msg.email}`} className="text-sm text-teal-400 hover:text-teal-300 transition-colors">
+                    <a href={`mailto:${msg.email}`} className="text-sm text-teal-400 hover:text-teal-300 transition-colors truncate block">
                       {msg.email}
                     </a>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0 justify-end">
                     <MarkAsReadButton messageId={msg.id} isRead={msg.is_read} />
                     <DeleteMessageButton id={msg.id} />
                   </div>
@@ -140,7 +140,7 @@ export default async function AdminMessagesPage({
                     <h4 className="text-sm font-semibold text-white/90 mb-2">Subject: {msg.subject}</h4>
                   )}
 
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap bg-white/5 p-4 rounded-md border border-white/5">
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words bg-white/5 p-4 rounded-md border border-white/5">
                     {msg.content}
                   </p>
 

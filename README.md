@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/icon.png" alt="Alfareza Logo" width="80" />
+  <img src="./public/opengraph-image.png" alt="Alfareza Logo" width="80" />
 </p>
 
 <h1 align="center">Alfareza — Personal Portfolio & Security Research Lab</h1>

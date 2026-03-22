@@ -109,11 +109,11 @@ export async function submitContactForm(prevState: any, formData: FormData) {
 export async function deleteMessage(id: string) {
   const supabase = await createClient();
 
-  // Validate admin token presence and role
+  // Validate super admin token
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user || user.user_metadata?.role !== "ADMIN") {
+  if (error || !user || user.email !== "alfareza.dev@gmail.com") {
     console.error("Unauthorized access to delete message. Account:", user?.email || "Unknown");
-    return { success: false, error: "Unauthorized access" };
+    return { success: false, error: "Unauthorized access: Super Admin only" };
   }
 
   // Get message details for the log before deleting
@@ -123,7 +123,7 @@ export async function deleteMessage(id: string) {
     .eq("id", id)
     .single();
 
-  const { error: deleteError } = await supabase
+  const { error: deleteError } = await supabaseAdmin
     .from("messages")
     .delete()
     .eq("id", id);

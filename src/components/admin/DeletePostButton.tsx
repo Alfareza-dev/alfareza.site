@@ -2,22 +2,22 @@
 
 import { useState, useTransition } from "react"
 import { Trash2, Loader2 } from "lucide-react"
-import { deleteMessage } from "@/app/actions/contact"
+import { deletePost } from "@/app/actions/posts"
 import { toast } from "sonner"
 
-export function DeleteMessageButton({ id }: { id: string }) {
+export function DeletePostButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition()
   const [showConfirm, setShowConfirm] = useState(false)
 
   const handleDelete = () => {
     startTransition(async () => {
-      const result = await deleteMessage(id)
+      const result = await deletePost(id)
       if (!result?.success) {
-        toast.error(result?.error || "Failed to delete message")
+        toast.error(result?.error || "Failed to delete post")
         setShowConfirm(false)
       } else {
         setShowConfirm(false)
-        toast.success("Message Deleted Successfully")
+        toast.success("Post Deleted Successfully")
       }
     })
   }
@@ -27,12 +27,12 @@ export function DeleteMessageButton({ id }: { id: string }) {
       <button
         onClick={() => setShowConfirm(!showConfirm)}
         disabled={isPending}
-        className={`p-2 rounded-md transition-colors ${
+        className={`p-2 rounded-md transition-colors border ${
           showConfirm 
-            ? "text-red-500 bg-red-500/5 hover:bg-red-500/10" 
-            : "text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
+            ? "text-red-500 bg-red-500/10 border-red-500/20" 
+            : "text-muted-foreground hover:text-red-400 hover:bg-white/10 border-white/5"
         }`}
-        title="Delete Message"
+        title="Delete Post"
       >
         <Trash2 className="w-4 h-4" />
       </button>

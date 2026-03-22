@@ -1,9 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { Post } from "@/types";
 import Link from "next/link";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import { PurpleButton } from "@/components/purple-button";
-import { deletePost } from "@/app/actions/posts";
+import { DeletePostButton } from "@/components/admin/DeletePostButton";
 
 export const metadata = {
   title: "Blog Management",
@@ -75,12 +75,7 @@ export default async function AdminPosts() {
                     <Edit className="w-4 h-4" />
                   </button>
                 </Link>
-                <form action={deletePost}>
-                  <input type="hidden" name="id" value={post.id} />
-                  <button type="submit" className="p-2 rounded-md hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors border border-white/5">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </form>
+                <DeletePostButton id={post.id} />
               </div>
             </div>
           ))}

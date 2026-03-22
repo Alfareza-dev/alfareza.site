@@ -3,18 +3,19 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function deletePost(formData: FormData) {
-  const id = formData.get("id") as string;
-  if (!id) return;
+export async function deletePost(id: string) {
+  if (!id) return { success: false, error: "Invalid post ID" };
 
   const supabase = await createClient();
 
-  // Validate admin token presence and role
+  // Validate super admin token
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user || user.user_metadata?.role !== "ADMIN") {
+  if (error || !user || user.email !== "alfareza.dev@gmail.com") {
     console.error("Unauthorized access to delete post. Account:", user?.email || "Unknown");
-    return;
+    return { success: false, error: "Unauthorized access: Super Admin only" };
   }
+
+  const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
 
   // Get post details for the log
   const { data: postToLog } = await supabase
@@ -23,14 +24,14 @@ export async function deletePost(formData: FormData) {
     .eq("id", id)
     .single();
 
-  const { error: deleteError } = await supabase
+  const { error: deleteError } = await supabaseAdmin
     .from("posts")
     .delete()
     .eq("id", id);
 
   if (deleteError) {
     console.error("Exact Supabase Delete Error:", JSON.stringify(deleteError, null, 2));
-    return;
+    return { success: false, error: "Failed to delete post." };
   }
 
   // Log the deletion
@@ -39,5 +40,7 @@ export async function deletePost(formData: FormData) {
     await createLog("POST_DELETED", `Deleted post: ${postToLog.title}`);
   }
 
-  revalidatePath("/admin");
+  revalidatePath("/admin/posts");
+  revalidatePath("/blog");
+  return { success: true };
 }

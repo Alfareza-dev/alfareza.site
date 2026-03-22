@@ -2,7 +2,6 @@ import { createClient } from "@/utils/supabase/server";
 import { Post } from "@/types";
 import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
-import { PurpleButton } from "@/components/purple-button";
 import { DeletePostButton } from "@/components/admin/DeletePostButton";
 
 export const metadata = {
@@ -26,32 +25,32 @@ export default async function AdminPosts() {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex items-center justify-between border-b border-white/10 pb-6">
+      <div className="border-b border-white/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <Edit className="w-8 h-8 text-teal-500" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+            <Edit className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 shrink-0" />
             Blog Posts
           </h1>
           <p className="text-muted-foreground mt-2">
             Manage your published personal blog posts here.
           </p>
         </div>
-        <Link href="/admin/posts/new">
-          <PurpleButton>
-            <Plus className="w-4 h-4 mr-2" />
+        <Link href="/admin/posts/new" className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+          <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-[#048092] hover:bg-[#036a7a] text-white rounded-lg transition-colors whitespace-nowrap">
+            <Plus className="w-4 h-4" />
             Create Post
-          </PurpleButton>
+          </button>
         </Link>
       </div>
 
       {!posts.length ? (
         <div className="flex flex-col items-center justify-center p-12 border border-white/10 border-dashed rounded-xl bg-white/[0.01]">
           <p className="text-muted-foreground mb-4">No blog posts found.</p>
-          <Link href="/admin/posts/new">
-            <PurpleButton>
-              <Plus className="w-4 h-4 mr-2" />
+          <Link href="/admin/posts/new" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-[#048092] hover:bg-[#036a7a] text-white rounded-lg transition-colors whitespace-nowrap">
+              <Plus className="w-4 h-4" />
               Write your first post
-            </PurpleButton>
+            </button>
           </Link>
         </div>
       ) : (

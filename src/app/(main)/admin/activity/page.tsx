@@ -59,17 +59,15 @@ export default async function ActivityLogPage({
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <Activity className="w-8 h-8 text-teal-500" />
-            Activity Log
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Monitor administrative actions and security events.
-            {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total entries)</span>}
-          </p>
-        </div>
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+          <Activity className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 animate-pulse shrink-0" />
+          Activity Log
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Monitor administrative actions and security events.
+          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total entries)</span>}
+        </p>
       </div>
 
       <div className="rounded-xl border border-teal-500/20 bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-2xl">

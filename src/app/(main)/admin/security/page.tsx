@@ -127,17 +127,15 @@ export default async function SecurityDashboard({
   return (
     <div className="space-y-8 font-sans">
       <AutoRefresh intervalSeconds={30} />
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <Shield className="w-8 h-8 text-teal-500" />
-            Security Center
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Monitor and manage unauthorized access attempts.
-            {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total alerts)</span>}
-          </p>
-        </div>
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+          <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 shrink-0" />
+          Security Center
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Monitor and manage unauthorized access attempts.
+          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total alerts)</span>}
+        </p>
       </div>
 
       <ClientMountedWrapper skeleton={

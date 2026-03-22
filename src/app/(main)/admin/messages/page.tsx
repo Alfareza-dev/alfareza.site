@@ -65,17 +65,15 @@ export default async function AdminMessagesPage({
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex items-center justify-between border-b border-white/10 pb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <Inbox className="w-8 h-8 text-teal-500" />
-            Inbox
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            View all incoming messages from your contact form.
-            {count !== null && <span className="ml-2 text-xs text-teal-400">({count} messages)</span>}
-          </p>
-        </div>
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+          <Inbox className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 shrink-0" />
+          Inbox
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          View all incoming messages from your contact form.
+          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} messages)</span>}
+        </p>
       </div>
 
       {/* Filter Tabs */}

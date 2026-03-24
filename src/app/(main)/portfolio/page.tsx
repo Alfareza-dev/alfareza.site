@@ -35,7 +35,7 @@ export default async function PortfolioPage({
             className={`flex items-center gap-2 px-4 py-2 font-sans font-medium text-sm rounded-md transition-colors ${
               currentPage <= 1
                 ? "text-muted-foreground bg-transparent cursor-not-allowed opacity-50"
-                : "text-white bg-white/5 hover:bg-white/10 hover:text-teal-400"
+                : "text-white bg-white/5 hover:bg-white/10 hover:text-brand-primary"
             }`}
           >
             <ChevronLeft className="w-4 h-4" />
@@ -51,7 +51,7 @@ export default async function PortfolioPage({
             className={`flex items-center gap-2 px-4 py-2 font-sans font-medium text-sm rounded-md transition-colors ${
               isNextDisabled
                 ? "text-muted-foreground bg-transparent cursor-not-allowed opacity-50"
-                : "text-white bg-white/5 hover:bg-white/10 hover:text-teal-400"
+                : "text-white bg-white/5 hover:bg-white/10 hover:text-brand-primary"
             }`}
           >
             Next

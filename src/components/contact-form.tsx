@@ -43,7 +43,7 @@ export function ContactForm() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col items-center justify-center p-8 text-center border border-white/10 rounded-2xl bg-white/[0.02]"
           >
-            <div className="w-16 h-16 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-brand-primary/20 text-brand-primary rounded-full flex items-center justify-center mb-6">
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h3 className="text-2xl font-semibold mb-2 text-white">Message Sent!</h3>
@@ -52,7 +52,7 @@ export function ContactForm() {
             </p>
             <button
               onClick={() => setSuccess(false)}
-              className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
+              className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
             >
               Send another message
             </button>
@@ -77,7 +77,7 @@ export function ContactForm() {
                   id="full_name"
                   name="full_name"
                   placeholder="Your name"
-                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 focus-visible:bg-white/10 transition-colors"
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary focus-visible:bg-white/10 transition-colors"
                   disabled={isPending}
                 />
                 {fieldErrors.full_name && (
@@ -94,7 +94,7 @@ export function ContactForm() {
                   id="email"
                   name="email"
                   placeholder="yourmail@example.com"
-                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 focus-visible:bg-white/10 transition-colors"
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary focus-visible:bg-white/10 transition-colors"
                   disabled={isPending}
                 />
                 {fieldErrors.email && (
@@ -111,7 +111,7 @@ export function ContactForm() {
                   id="subject"
                   name="subject"
                   placeholder="Inquiry regarding..."
-                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 focus-visible:bg-white/10 transition-colors"
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary focus-visible:bg-white/10 transition-colors"
                   disabled={isPending}
                 />
                 {fieldErrors.subject && (
@@ -127,7 +127,7 @@ export function ContactForm() {
                   id="content"
                   name="content"
                   placeholder="How can I help you?"
-                  className="flex min-h-[120px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 focus-visible:bg-white/10 transition-colors resize-none"
+                  className="flex min-h-[120px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary focus-visible:bg-white/10 transition-colors resize-none"
                   disabled={isPending}
                 />
                 {fieldErrors.content && (
@@ -154,7 +154,7 @@ export function ContactForm() {
             <button
               type="submit"
               disabled={isPending}
-              className="group relative flex items-center justify-center gap-2 mt-4 h-11 w-full rounded-md bg-teal-600 text-sm font-medium text-white transition-all hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden"
+              className="flex items-center justify-center gap-2 mt-4 h-11 w-full rounded-md bg-zinc-200 text-sm font-bold text-[#1c2438] transition-all hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               {isPending ? (

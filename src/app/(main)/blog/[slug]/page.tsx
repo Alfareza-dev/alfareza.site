@@ -1,8 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { Post } from "@/types";
 import ReactMarkdown from "react-markdown";
 import type { Metadata } from "next";
+import { ArrowLeft } from "lucide-react";
 
 export const revalidate = 3600;
 
@@ -76,6 +78,12 @@ export default async function BlogPostPage({
 
   return (
     <article className="flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-screen">
+      {/* Back to Blog */}
+      <Link href="/blog" className="inline-flex items-center text-sm text-zinc-400 hover:text-white transition-colors mb-8 group">
+        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-0.5 transition-transform" />
+        Back to Blog
+      </Link>
+
       <header className="mb-12 border-b border-white/10 pb-8">
         <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-6">
           {post.title}
@@ -92,7 +100,7 @@ export default async function BlogPostPage({
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map((tag) => (
-              <span key={tag} className="px-2 py-1 text-xs font-medium rounded-md bg-white/5 border border-white/10 text-[#048092] font-sans">
+              <span key={tag} className="px-2 py-1 text-xs font-medium rounded-md bg-white/5 border border-white/10 text-brand-primary font-sans">
                 {tag}
               </span>
             ))}
@@ -104,12 +112,12 @@ export default async function BlogPostPage({
         {post.content.split("---").filter(section => section.trim()).map((section, index) => (
           <div 
             key={index} 
-            className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] hover:border-teal-500/30 transition-all duration-500 overflow-hidden"
+            className="group relative p-4 md:p-8 rounded-2xl border border-white/10 bg-[#161c2d] hover:border-brand-primary/30 transition-all duration-500 overflow-hidden"
           >
             {/* Subtle purple glow effect on hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
-            <div className="prose prose-invert prose-teal max-w-none relative z-10">
+            <div className="prose prose-invert prose-zinc max-w-none relative z-10 prose-a:text-zinc-300 prose-a:underline-offset-4 hover:prose-a:text-white prose-pre:bg-[#161c2d] prose-pre:border prose-pre:border-white/10 prose-code:text-zinc-300">
               <ReactMarkdown>{section}</ReactMarkdown>
             </div>
           </div>

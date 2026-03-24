@@ -66,13 +66,15 @@ export default async function AdminMessagesPage({
   return (
     <div className="space-y-8 font-sans">
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-          <Inbox className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 shrink-0" />
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <span className="p-2 rounded-full hover:bg-zinc-800/50 transition-all cursor-default">
+            <Inbox className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-300 shrink-0" />
+          </span>
           Inbox
         </h1>
         <p className="text-muted-foreground mt-2">
           View all incoming messages from your contact form.
-          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} messages)</span>}
+          {count !== null && <span className="ml-2 text-xs text-brand-primary">({count} messages)</span>}
         </p>
       </div>
 
@@ -84,14 +86,14 @@ export default async function AdminMessagesPage({
             href={`/admin/messages?filter=${tab.value}&page=1`}
             className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-all ${
               filter === tab.value
-                ? "bg-teal-500/15 border-teal-500/30 text-teal-400"
+                ? "bg-brand-primary/15 border-brand-primary/30 text-brand-primary"
                 : "bg-white/5 border-white/10 text-muted-foreground hover:text-white hover:bg-white/10"
             }`}
           >
             {tab.icon}
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
-              <span className="text-xs bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded-full font-bold min-w-[20px] text-center">
+              <span className="text-xs bg-zinc-700/50 text-zinc-300 px-1.5 py-0.5 rounded-full font-bold min-w-[20px] text-center">
                 {tab.badge}
               </span>
             )}
@@ -110,12 +112,12 @@ export default async function AdminMessagesPage({
               <div
                 key={msg.id}
                 className={`p-6 transition-colors hover:bg-white/[0.02] relative ${
-                  !msg.is_read ? "border-l-2 border-l-teal-500" : ""
+                  !msg.is_read ? "border-l-2 border-l-brand-primary" : ""
                 }`}
               >
                 {/* Unread glow indicator */}
                 {!msg.is_read && (
-                  <div className="absolute top-6 left-4 w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(4,128,146,0.6)]" />
+                  <div className="absolute top-6 left-4 w-2 h-2 rounded-full bg-brand-primary animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
                 )}
 
                 <div className={`flex justify-between items-start gap-4 mb-4 ${!msg.is_read ? "pl-4" : ""}`}>
@@ -123,7 +125,7 @@ export default async function AdminMessagesPage({
                     <h3 className={`font-medium truncate ${!msg.is_read ? "text-white font-semibold" : "text-white/70"}`}>
                       {msg.full_name}
                     </h3>
-                    <a href={`mailto:${msg.email}`} className="text-sm text-teal-400 hover:text-teal-300 transition-colors truncate block">
+                    <a href={`mailto:${msg.email}`} className="text-sm text-zinc-300 hover:text-white transition-colors underline-offset-4 hover:underline truncate block">
                       {msg.email}
                     </a>
                   </div>

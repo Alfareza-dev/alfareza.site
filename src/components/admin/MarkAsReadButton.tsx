@@ -13,7 +13,7 @@ export function MarkAsReadButton({ messageId, isRead }: { messageId: string; isR
 
   if (done) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-teal-400 opacity-70">
+      <span className="inline-flex items-center gap-1 text-xs text-brand-primary opacity-70">
         <Check className="w-3.5 h-3.5" /> Read
       </span>
     );
@@ -41,7 +41,7 @@ export function MarkAsReadButton({ messageId, isRead }: { messageId: string; isR
     <button
       onClick={handleMarkRead}
       disabled={isLoading}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md border border-teal-500/20 bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 hover:border-teal-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md border border-brand-primary/20 bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 hover:border-brand-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       title="Mark as read"
     >
       <Check className="w-3.5 h-3.5" />

@@ -64,25 +64,25 @@ export default async function AdminDashboardOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Visitor Stats */}
-        <div className="bg-[#0c0c0c] border border-white/10 p-6 rounded-2xl shadow-2xl relative overflow-hidden group">
+        <div className="bg-[#161c2d] border border-zinc-800 p-6 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.05)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
-            <Users className="w-16 h-16 text-teal-500" />
+            <Users className="w-16 h-16 text-brand-primary" />
           </div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Traffic</h2>
           <div className="flex items-end gap-3 mb-1">
             <span className="text-4xl font-black text-white">{totalVisits || 0}</span>
             <span className="text-sm text-muted-foreground mb-1 leading-relaxed">Total Visits</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-teal-400 mt-4">
+          <div className="flex items-center gap-2 text-sm text-brand-primary mt-4">
             <ScanEye className="w-4 h-4" />
             <span className="font-medium">{uniqueVisitCount}</span> Unique Visitors (by IP)
           </div>
         </div>
 
         {/* Security Health */}
-        <div className="bg-[#0c0c0c] border border-white/10 p-6 rounded-2xl shadow-2xl relative overflow-hidden group">
+        <div className="bg-[#161c2d] border border-zinc-800 p-6 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.05)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
-            <ShieldCheck className="w-16 h-16 text-teal-500" />
+            <ShieldCheck className="w-16 h-16 text-brand-primary" />
           </div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Security</h2>
           <div className="flex items-end gap-3 mb-1">
@@ -99,7 +99,7 @@ export default async function AdminDashboardOverview() {
         </div>
 
         {/* Last Login */}
-        <div className="bg-[#0c0c0c] border border-white/10 p-6 rounded-2xl shadow-2xl relative overflow-hidden group">
+        <div className="bg-[#161c2d] border border-zinc-800 p-6 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.05)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
             <Clock className="w-16 h-16 text-yellow-500" />
           </div>
@@ -111,7 +111,7 @@ export default async function AdminDashboardOverview() {
             <span className="text-sm text-muted-foreground">Last Successful Admin Login</span>
           </div>
           <div className="mt-6">
-            <Link href="/admin/activity" className="text-xs font-semibold uppercase tracking-wider text-teal-400 hover:text-teal-300">
+            <Link href="/admin/activity" className="text-xs font-semibold uppercase tracking-wider text-zinc-300 hover:text-white">
               View Access Logs &rarr;
             </Link>
           </div>
@@ -123,8 +123,8 @@ export default async function AdminDashboardOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <Link href="/admin/posts/new">
-          <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors flex items-center gap-4">
-            <div className="p-3 bg-teal-500/10 rounded-lg text-teal-500">
+          <div className="p-6 rounded-xl border border-zinc-800 bg-white/[0.02] hover:bg-white/[0.04] transition-colors flex items-center gap-4">
+            <div className="p-3 bg-brand-primary/10 rounded-lg text-brand-primary">
               <FileText className="w-6 h-6" />
             </div>
             <div>
@@ -135,7 +135,7 @@ export default async function AdminDashboardOverview() {
         </Link>
         
         <Link href="/admin/security">
-          <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors flex items-center gap-4">
+          <div className="p-6 rounded-xl border border-zinc-800 bg-white/[0.02] hover:bg-white/[0.04] transition-colors flex items-center gap-4">
             <div className="p-3 bg-red-500/10 rounded-lg text-red-500">
               <ShieldCheck className="w-6 h-6" />
             </div>

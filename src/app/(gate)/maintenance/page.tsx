@@ -7,51 +7,51 @@ export const metadata = {
 
 export default function MaintenancePage() {
   return (
-    <div className="fixed inset-0 bg-[#050a0c] z-[9999] flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
-      {/* Deep teal background glow */}
+    <div className="fixed top-0 left-0 w-full h-[100dvh] bg-[#1c2438] z-[9999] flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
+      {/* Deep indigo background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#048092]/8 blur-[120px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#d4d4d8]/8 blur-[120px] rounded-full" />
       </div>
 
       <div className="max-w-2xl w-full relative z-10">
-        <div className="rounded-2xl border border-[#048092]/20 bg-[#0a1214]/90 backdrop-blur-2xl shadow-2xl shadow-[#048092]/10 p-8 sm:p-14 text-center space-y-8 overflow-hidden relative">
+        <div className="rounded-2xl border border-[#d4d4d8]/20 bg-[#1c2438]/90 backdrop-blur-2xl shadow-2xl shadow-[#d4d4d8]/10 p-8 sm:p-14 text-center space-y-8 overflow-hidden relative">
 
           {/* Animated Gear System */}
           <div className="relative flex items-center justify-center mx-auto w-52 h-52 sm:w-64 sm:h-64">
             {/* Outer ring — slow rotation */}
             <div
-              className="absolute inset-0 rounded-full border-2 border-dashed border-[#048092]/20"
+              className="absolute inset-0 rounded-full border-2 border-dashed border-[#d4d4d8]/20"
               style={{ animation: "gear-spin 12s linear infinite" }}
             />
             {/* Middle ring — medium rotation reversed */}
             <div
-              className="absolute inset-[18%] rounded-full border-2 border-dashed border-[#048092]/25"
+              className="absolute inset-[18%] rounded-full border-2 border-dashed border-[#d4d4d8]/25"
               style={{ animation: "gear-spin-reverse 8s linear infinite" }}
             />
             {/* Inner ring — fast rotation */}
             <div
-              className="absolute inset-[36%] rounded-full border-2 border-dashed border-[#048092]/30"
+              className="absolute inset-[36%] rounded-full border-2 border-dashed border-[#d4d4d8]/30"
               style={{ animation: "gear-spin 5s linear infinite" }}
             />
 
             {/* Circuit decoration lines */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#048092]/8" />
-            <div className="absolute top-1/2 left-0 right-0 h-px bg-[#048092]/8" />
-            <div className="absolute left-[25%] top-0 bottom-0 w-px bg-[#048092]/5" />
-            <div className="absolute left-[75%] top-0 bottom-0 w-px bg-[#048092]/5" />
-            <div className="absolute top-[25%] left-0 right-0 h-px bg-[#048092]/5" />
-            <div className="absolute top-[75%] left-0 right-0 h-px bg-[#048092]/5" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#d4d4d8]/8" />
+            <div className="absolute top-1/2 left-0 right-0 h-px bg-[#d4d4d8]/8" />
+            <div className="absolute left-[25%] top-0 bottom-0 w-px bg-[#d4d4d8]/5" />
+            <div className="absolute left-[75%] top-0 bottom-0 w-px bg-[#d4d4d8]/5" />
+            <div className="absolute top-[25%] left-0 right-0 h-px bg-[#d4d4d8]/5" />
+            <div className="absolute top-[75%] left-0 right-0 h-px bg-[#d4d4d8]/5" />
 
             {/* Pulsing dots at intersections */}
-            <div className="absolute top-[25%] left-[25%] w-1.5 h-1.5 rounded-full bg-[#048092]/40 animate-pulse" />
-            <div className="absolute top-[25%] left-[75%] w-1.5 h-1.5 rounded-full bg-[#048092]/40 animate-pulse" style={{ animationDelay: "0.5s" }} />
-            <div className="absolute top-[75%] left-[25%] w-1.5 h-1.5 rounded-full bg-[#048092]/40 animate-pulse" style={{ animationDelay: "1s" }} />
-            <div className="absolute top-[75%] left-[75%] w-1.5 h-1.5 rounded-full bg-[#048092]/40 animate-pulse" style={{ animationDelay: "1.5s" }} />
+            <div className="absolute top-[25%] left-[25%] w-1.5 h-1.5 rounded-full bg-[#d4d4d8]/40 animate-pulse" />
+            <div className="absolute top-[25%] left-[75%] w-1.5 h-1.5 rounded-full bg-[#d4d4d8]/40 animate-pulse" style={{ animationDelay: "0.5s" }} />
+            <div className="absolute top-[75%] left-[25%] w-1.5 h-1.5 rounded-full bg-[#d4d4d8]/40 animate-pulse" style={{ animationDelay: "1s" }} />
+            <div className="absolute top-[75%] left-[75%] w-1.5 h-1.5 rounded-full bg-[#d4d4d8]/40 animate-pulse" style={{ animationDelay: "1.5s" }} />
 
             {/* Center icon */}
-            <div className="relative z-10 bg-[#0a1214] border border-[#048092]/40 p-5 sm:p-6 rounded-full shadow-[0_0_30px_rgba(4,128,146,0.3)]">
+            <div className="relative z-10 bg-[#1c2438] border border-[#d4d4d8]/40 p-5 sm:p-6 rounded-full shadow-[0_0_30px_rgba(212,212,216,0.3)]">
               <Settings
-                className="w-10 h-10 sm:w-14 sm:h-14 text-[#048092]"
+                className="w-10 h-10 sm:w-14 sm:h-14 text-[#d4d4d8]"
                 style={{ animation: "gear-spin 4s linear infinite" }}
               />
             </div>
@@ -62,12 +62,12 @@ export default function MaintenancePage() {
             <h1
               className="text-2xl sm:text-4xl font-black tracking-[-0.03em] text-white"
               style={{
-                textShadow: "0 0 20px rgba(4,128,146,0.6), 0 0 40px rgba(4,128,146,0.3)",
+                textShadow: "0 0 20px rgba(212,212,216,0.6), 0 0 40px rgba(212,212,216,0.3)",
               }}
             >
               SYSTEM OPTIMIZATION
             </h1>
-            <p className="text-[#048092] text-sm sm:text-base font-semibold uppercase tracking-[0.2em]">
+            <p className="text-[#d4d4d8] text-sm sm:text-base font-semibold uppercase tracking-[0.2em]">
               In Progress
             </p>
 
@@ -77,9 +77,9 @@ export default function MaintenancePage() {
               </p>
 
               {/* Progress bar animation */}
-              <div className="w-full max-w-xs mx-auto h-1 bg-[#048092]/10 rounded-full overflow-hidden">
+              <div className="w-full max-w-xs mx-auto h-1 bg-[#d4d4d8]/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#048092]/60 rounded-full"
+                  className="h-full bg-[#d4d4d8]/60 rounded-full"
                   style={{
                     animation: "progress-sweep 2.5s ease-in-out infinite",
                   }}
@@ -93,8 +93,8 @@ export default function MaintenancePage() {
           </div>
 
           {/* Bottom badge */}
-          <div className="pt-6 mt-4 border-t border-[#048092]/10 relative z-10">
-            <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm font-bold tracking-widest uppercase text-[#048092]/80 bg-[#048092]/10 px-5 py-2.5 rounded-full border border-[#048092]/20">
+          <div className="pt-6 mt-4 border-t border-[#d4d4d8]/10 relative z-10">
+            <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm font-bold tracking-widest uppercase text-[#d4d4d8]/80 bg-[#d4d4d8]/10 px-5 py-2.5 rounded-full border border-[#d4d4d8]/20">
               <Wifi className="w-4 h-4 animate-pulse flex-shrink-0" />
               <span className="truncate">Scheduled Maintenance</span>
             </div>

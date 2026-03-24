@@ -60,7 +60,7 @@ export function BlockIPButton({ ip, initiallyBlocked = false }: { ip: string, in
         <button 
           onClick={handleUnblock}
           disabled={isLoading}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md bg-white/5 border border-white/10 hover:bg-teal-500/20 hover:text-teal-400 hover:border-teal-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md bg-white/5 border border-white/10 hover:bg-brand-primary/20 hover:text-brand-primary hover:border-brand-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ShieldCheck className="w-3.5 h-3.5" />
           {isLoading ? "..." : "Unblock"}

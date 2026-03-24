@@ -43,9 +43,9 @@ export function AboutAndSkills() {
           {skills.map((skill) => (
             <div 
               key={skill.name} 
-              className="flex flex-col items-center justify-center gap-2 p-4 border border-white/10 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] hover:border-teal-500/30 transition-all duration-300 group"
+              className="flex flex-col items-center justify-center gap-2 p-4 border border-white/10 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] hover:border-brand-primary/30 transition-all duration-300 group"
             >
-              <skill.icon className="w-6 h-6 text-muted-foreground group-hover:text-teal-400 transition-colors" />
+              <skill.icon className="w-6 h-6 text-muted-foreground group-hover:text-brand-primary transition-colors" />
               <span className="text-xs font-medium text-muted-foreground group-hover:text-white transition-colors">
                 {skill.name}
               </span>

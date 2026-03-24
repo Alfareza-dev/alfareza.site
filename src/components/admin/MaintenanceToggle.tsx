@@ -38,10 +38,10 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
 
   return (
     <>
-      <div className="bg-[#0c0c0c] border border-white/10 p-6 rounded-2xl shadow-2xl relative overflow-hidden">
+      <div className="bg-[#161c2d] border border-white/10 p-6 rounded-2xl shadow-2xl relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg ${isEnabled ? "bg-yellow-500/10 text-yellow-500" : "bg-teal-500/10 text-teal-500"}`}>
+            <div className={`p-3 rounded-lg ${isEnabled ? "bg-yellow-500/10 text-yellow-500" : "bg-brand-primary/10 text-brand-primary"}`}>
               <Settings className="w-6 h-6" />
             </div>
             <div>
@@ -54,7 +54,7 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
             <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
               isEnabled 
                 ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" 
-                : "text-teal-400 bg-teal-500/10 border-teal-500/20"
+                : "text-brand-primary bg-brand-primary/10 border-brand-primary/20"
             }`}>
               {isEnabled ? "Active" : "Off"}
             </span>
@@ -63,10 +63,10 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
             <button
               onClick={handleToggleClick}
               disabled={isLoading}
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0c0c0c] disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#161c2d] disabled:opacity-50 disabled:cursor-not-allowed ${
                 isEnabled 
                   ? "bg-yellow-500/80 focus:ring-yellow-500/50" 
-                  : "bg-white/20 focus:ring-teal-500/50"
+                  : "bg-white/20 focus:ring-brand-primary/50"
               }`}
               aria-label="Toggle maintenance mode"
             >
@@ -89,8 +89,8 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
 
       {/* Confirmation Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#161c2d]/70 backdrop-blur-sm p-4">
+          <div className="bg-[#161c2d] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl space-y-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-full bg-yellow-500/10 text-yellow-500">
                 <AlertTriangle className="w-6 h-6" />
@@ -117,7 +117,7 @@ export function MaintenanceToggle({ initialStatus }: { initialStatus: boolean })
                 onClick={handleConfirm}
                 className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-colors ${
                   isEnabled
-                    ? "bg-teal-500/20 border border-teal-500/30 text-teal-400 hover:bg-teal-500/30"
+                    ? "bg-brand-primary/20 border border-brand-primary/30 text-brand-primary hover:bg-brand-primary/30"
                     : "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/30"
                 }`}
               >

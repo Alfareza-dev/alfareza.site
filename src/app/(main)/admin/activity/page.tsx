@@ -49,31 +49,33 @@ export default async function ActivityLogPage({
   const totalPages = Math.ceil((count || 0) / PAGE_SIZE);
 
   const getActionIcon = (action: string) => {
-    if (action.includes("CREATE")) return <Plus className="w-5 h-5 text-teal-400" />;
-    if (action.includes("DELETE")) return <Trash className="w-5 h-5 text-teal-400" />;
-    if (action.includes("UPDATE")) return <Edit className="w-5 h-5 text-teal-400" />;
-    if (action.includes("LOGIN")) return <LogIn className="w-5 h-5 text-teal-400" />;
-    if (action.includes("LOGOUT")) return <LogOut className="w-5 h-5 text-teal-400" />;
-    return <Activity className="w-5 h-5 text-teal-400" />;
+    if (action.includes("CREATE")) return <Plus className="w-5 h-5 text-brand-primary" />;
+    if (action.includes("DELETE")) return <Trash className="w-5 h-5 text-brand-primary" />;
+    if (action.includes("UPDATE")) return <Edit className="w-5 h-5 text-brand-primary" />;
+    if (action.includes("LOGIN")) return <LogIn className="w-5 h-5 text-brand-primary" />;
+    if (action.includes("LOGOUT")) return <LogOut className="w-5 h-5 text-brand-primary" />;
+    return <Activity className="w-5 h-5 text-brand-primary" />;
   };
 
   return (
     <div className="space-y-8 font-sans">
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-          <Activity className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 animate-pulse shrink-0" />
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <span className="p-2 rounded-full hover:bg-zinc-800/50 transition-all cursor-default">
+            <Activity className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-300 shrink-0" />
+          </span>
           Activity Log
         </h1>
         <p className="text-muted-foreground mt-2">
           Monitor administrative actions and security events.
-          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total entries)</span>}
+          {count !== null && <span className="ml-2 text-xs text-brand-primary">({count} total entries)</span>}
         </p>
       </div>
 
-      <div className="rounded-xl border border-teal-500/20 bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-2xl">
+      <div className="rounded-xl border border-brand-primary/20 bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-2xl">
         {logs?.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
-            <ShieldAlert className="w-12 h-12 mb-4 opacity-50 text-teal-500" />
+            <ShieldAlert className="w-12 h-12 mb-4 opacity-50 text-brand-primary" />
             <p>No activity logs found.</p>
           </div>
         ) : (
@@ -83,12 +85,12 @@ export default async function ActivityLogPage({
                 key={log.id} 
                 className="flex items-start gap-4 p-6 hover:bg-white/[0.04] transition-colors"
               >
-                <div className="p-3 rounded-full bg-teal-500/10 border border-teal-500/20 shrink-0">
+                <div className="p-3 rounded-full bg-brand-primary/10 border border-brand-primary/20 shrink-0">
                   {getActionIcon(log.action)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-teal-300 truncate">
+                    <h3 className="font-semibold text-brand-primary truncate">
                       {log.action.replace(/_/g, " ")}
                     </h3>
                     <span className="text-xs text-muted-foreground whitespace-nowrap bg-white/5 px-2 py-1 rounded-md border border-white/10 shrink-0">
@@ -99,7 +101,7 @@ export default async function ActivityLogPage({
                     {log.details}
                   </p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1.5 opacity-80">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
                     {log.admin_email}
                   </p>
                 </div>

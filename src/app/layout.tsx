@@ -1,12 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto } from "next/font/google";
+import { Inter, Domine } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
-const roboto = Roboto({
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const domine = Domine({
   weight: ["400", "700"],
-  variable: "--font-roboto",
+  variable: "--font-domine",
   subsets: ["latin"],
   display: "swap",
 });
@@ -43,9 +49,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${domine.variable}`}>
       <body
-        className={`${roboto.variable} font-sans antialiased selection:bg-teal-500/30 min-h-screen flex flex-col bg-background text-foreground leading-relaxed`}
+        className="font-sans antialiased selection:bg-brand-primary/30 min-h-screen flex flex-col bg-background text-foreground leading-relaxed"
       >
         <ThemeProvider
           attribute="class"

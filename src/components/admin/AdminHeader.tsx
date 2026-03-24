@@ -37,27 +37,27 @@ export function AdminHeader({ userEmail, hasCriticalAlert }: AdminHeaderProps) {
   }, [pathname]);
 
   return (
-    <header className="border-b border-white/10 bg-white/[0.02]">
+    <header className="border-b border-zinc-800 bg-[#1c2438]">
       <div className="flex h-16 items-center px-6 max-w-7xl mx-auto justify-between">
         {/* Left: Logo + Desktop Nav */}
-        <div className="flex items-center gap-4">
-          <Link href="/admin" className="font-bold text-lg tracking-tight shrink-0">
-            Admin <span className="text-teal-500">Dashboard</span>
+        <div className="flex items-center gap-6">
+          <Link href="/admin" className="font-bold text-lg tracking-tight text-white shrink-0">
+            Admin <span className="text-brand-primary">Dashboard</span>
           </Link>
-          <nav className="hidden lg:flex items-center gap-3 text-sm font-medium">
+          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`transition-colors relative ${
+                className={`px-3 py-1.5 rounded-lg transition-all relative font-medium ${
                   pathname === link.href
-                    ? "text-teal-400"
-                    : "text-muted-foreground hover:text-white"
+                    ? "bg-[#f4f4f5] text-[#1c2438]"
+                    : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 {link.name}
                 {link.name === "Security" && hasCriticalAlert && (
-                  <span className="absolute -top-1 -right-2 flex h-2 w-2">
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                   </span>
@@ -68,38 +68,37 @@ export function AdminHeader({ userEmail, hasCriticalAlert }: AdminHeaderProps) {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <Link 
-            href="/" 
-            target="_blank" 
-            className="hidden md:inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:text-white text-muted-foreground h-9 px-3 border border-white/10 bg-white/5"
+        <div className="flex items-center gap-1">
+          <Link
+            href="/"
+            target="_blank"
+            className="hidden md:inline-flex items-center justify-center p-2.5 rounded-xl text-zinc-300 hover:bg-zinc-800 transition-all"
+            title="View Site"
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            View Site
+            <ExternalLink className="w-4 h-4" />
           </Link>
 
           {/* Email: show on large, icon on medium, hide on mobile */}
-          <span className="hidden lg:inline-block text-sm text-muted-foreground truncate max-w-[200px]">
+          <span className="hidden lg:inline-block text-sm text-zinc-400 truncate max-w-[180px] px-2">
             {userEmail}
           </span>
-          <span className="hidden md:inline-flex lg:hidden items-center justify-center w-9 h-9 rounded-md border border-white/10 bg-white/5 text-muted-foreground" title={userEmail}>
+          <span className="hidden md:inline-flex lg:hidden items-center justify-center p-2.5 rounded-xl text-zinc-300 hover:bg-zinc-800 transition-all cursor-default" title={userEmail}>
             <User className="w-4 h-4" />
           </span>
 
           <form action="/auth/signout" method="post">
-            <button className="hidden md:inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:text-white text-muted-foreground h-9 px-3">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+            <button className="hidden md:inline-flex items-center justify-center p-2.5 rounded-xl text-zinc-300 hover:bg-zinc-800 transition-all">
+              <LogOut className="w-4 h-4" />
             </button>
           </form>
 
           {/* Mobile Hamburger */}
           <button
             onClick={() => setIsOpen(true)}
-            className="lg:hidden p-2 text-white hover:bg-white/5 rounded-lg transition-colors"
+            className="lg:hidden p-2.5 text-zinc-300 hover:bg-zinc-800 rounded-xl transition-all"
             aria-label="Open Menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -110,7 +109,7 @@ export function AdminHeader({ userEmail, hasCriticalAlert }: AdminHeaderProps) {
           {/* Close button */}
           <div className="flex items-center justify-between p-6">
             <span className="font-bold text-lg tracking-tight">
-              Admin <span className="text-teal-500">Dashboard</span>
+              Admin <span className="text-brand-primary">Dashboard</span>
             </span>
             <button
               onClick={() => setIsOpen(false)}
@@ -130,8 +129,8 @@ export function AdminHeader({ userEmail, hasCriticalAlert }: AdminHeaderProps) {
                 onClick={() => setIsOpen(false)}
                 className={`text-2xl font-bold tracking-tight transition-colors relative ${
                   pathname === link.href
-                    ? "text-teal-400"
-                    : "text-white hover:text-teal-400"
+                    ? "text-brand-primary"
+                    : "text-white hover:text-brand-primary"
                 }`}
               >
                 {link.name}

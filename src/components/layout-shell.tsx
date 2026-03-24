@@ -34,14 +34,14 @@ export function Header() {
   ];
 
   return (
-    <header className="w-full sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md z-40 border-b border-white/5">
-      <div className="max-w-5xl mx-auto flex items-center justify-between p-6">
-        <Link href="/" className="font-bold text-xl tracking-tighter text-white flex items-baseline">
-          Alfareza<span className="text-teal-400 font-black">.</span>
+    <header className="w-full h-14 sticky top-0 bg-transparent backdrop-blur-xl z-40 border-b border-white/5 flex items-center">
+      <div className="w-full max-w-5xl mx-auto flex items-center justify-between px-6">
+        <Link href="/" className="font-bold text-lg tracking-tighter text-white flex items-baseline">
+          Alfareza<span className="text-brand-primary font-black">.</span>
         </Link>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#d4d4d8]">
           {navLinks.map((link) => (
             <Link key={link.name} href={link.href} className="hover:text-white transition-colors">
               {link.name}
@@ -50,7 +50,7 @@ export function Header() {
         </nav>
 
         {/* Desktop Socials */}
-        <div className="hidden md:flex items-center gap-4 text-muted-foreground">
+        <div className="hidden md:flex items-center gap-4 text-[#d4d4d8]">
           {socialLinks.map((social, i) => (
             <Link key={i} href={social.href} target="_blank" className="hover:text-white transition-colors">
               <social.icon className="w-5 h-5" />
@@ -75,7 +75,7 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-0 h-screen w-full bg-[#0a0a0a]/95 backdrop-blur-2xl z-50 flex flex-col items-center justify-center md:hidden"
+              className="fixed inset-0 h-screen w-full bg-[#1c2438]/95 backdrop-blur-2xl z-50 flex flex-col items-center justify-center md:hidden"
             >
               {/* Close Button */}
               <button 
@@ -93,7 +93,7 @@ export function Header() {
                     key={link.name} 
                     href={link.href} 
                     onClick={() => setIsOpen(false)}
-                    className="text-3xl md:text-5xl font-bold tracking-tight text-white hover:text-teal-400 transition-colors font-sans"
+                    className="text-3xl md:text-5xl font-bold tracking-tight text-white hover:text-brand-primary transition-colors font-sans"
                   >
                     {link.name}
                   </Link>

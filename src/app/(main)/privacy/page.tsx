@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen pt-24 pb-16 font-sans">
       <div className="max-w-3xl mx-auto px-6 space-y-12">
         <header className="space-y-4">
-          <Link href="/" className="text-sm text-teal-400 hover:text-teal-300 transition-colors">
+          <Link href="/" className="text-sm text-brand-primary hover:text-brand-primary/80 transition-colors">
             &larr; Back to Home
           </Link>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
@@ -23,9 +23,9 @@ export default function PrivacyPolicy() {
         </header>
 
         <div className="space-y-8 text-gray-300 leading-relaxed">
-          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl">
+          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#161c2d]">
             <h2 className="text-2xl font-semibold text-white flex items-center gap-3 mb-6">
-              <EyeOff className="w-6 h-6 text-teal-500" />
+              <EyeOff className="w-6 h-6 text-brand-primary" />
               Zero Third-Party Sharing
             </h2>
             <p>
@@ -35,9 +35,9 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl">
+          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#161c2d]">
             <h2 className="text-2xl font-semibold text-white flex items-center gap-3 mb-6">
-              <ShieldCheck className="w-6 h-6 text-teal-500" />
+              <ShieldCheck className="w-6 h-6 text-brand-primary" />
               Security Logging & IP Tracking
             </h2>
             <p className="mb-4">
@@ -57,9 +57,9 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl">
+          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#161c2d]">
             <h2 className="text-2xl font-semibold text-white flex items-center gap-3 mb-6">
-              <Database className="w-6 h-6 text-teal-500" />
+              <Database className="w-6 h-6 text-brand-primary" />
               Data Persistence (Supabase)
             </h2>
             <p>
@@ -69,9 +69,9 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl">
+          <section className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#161c2d]">
             <h2 className="text-2xl font-semibold text-white flex items-center gap-3 mb-6">
-              <Lock className="w-6 h-6 text-teal-500" />
+              <Lock className="w-6 h-6 text-brand-primary" />
               Your Rights
             </h2>
             <p>

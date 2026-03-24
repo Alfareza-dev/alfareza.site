@@ -128,27 +128,29 @@ export default async function SecurityDashboard({
     <div className="space-y-8 font-sans">
       <AutoRefresh intervalSeconds={30} />
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-          <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-teal-500 shrink-0" />
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <span className="p-2 rounded-full hover:bg-zinc-800/50 transition-all cursor-default">
+            <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-300 shrink-0" />
+          </span>
           Security Center
         </h1>
         <p className="text-muted-foreground mt-2">
           Monitor and manage unauthorized access attempts.
-          {count !== null && <span className="ml-2 text-xs text-teal-400">({count} total alerts)</span>}
+          {count !== null && <span className="ml-2 text-xs text-brand-primary">({count} total alerts)</span>}
         </p>
       </div>
 
       <ClientMountedWrapper skeleton={
-        <div className="flex flex-col items-center justify-center p-20 text-muted-foreground border border-white/10 rounded-xl bg-black/50">
+        <div className="flex flex-col items-center justify-center p-20 text-muted-foreground border border-white/10 rounded-xl bg-[#161c2d]/50">
           <ShieldAlert className="w-12 h-12 mb-4 opacity-50 text-red-500 animate-pulse" />
           <p>Decrypting and verifying live security feeds...</p>
         </div>
       }>
         {/* Paginated Alert Log */}
-        <div className="rounded-xl border border-white/10 bg-[#0c0c0c] backdrop-blur-xl shadow-2xl p-6">
+        <div className="rounded-xl border border-white/10 bg-[#161c2d] backdrop-blur-xl shadow-2xl p-6">
           {alerts?.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground w-full">
-              <Shield className="w-12 h-12 mb-4 opacity-50 text-teal-500" />
+              <Shield className="w-12 h-12 mb-4 opacity-50 text-brand-primary" />
               <p>No security threats detected. Your system is safe.</p>
             </div>
           ) : (
@@ -176,13 +178,13 @@ export default async function SecurityDashboard({
                           ? 'bg-red-500/20 border-red-500/30 text-red-500'
                           : isCritical 
                             ? 'bg-red-500/10 border-red-500/20 text-red-400' 
-                            : 'bg-teal-500/10 border-teal-500/20 text-teal-400'
+                            : 'bg-brand-primary/10 border-brand-primary/20 text-brand-primary'
                       }`}>
                         {isHoneypot ? <Ghost className="w-5 h-5" /> : isCritical ? <ShieldAlert className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-1">
-                          <h3 className={`font-semibold ${isHoneypot ? 'text-red-500 font-bold tracking-wide' : isCritical ? 'text-red-400' : 'text-teal-300'}`}>
+                          <h3 className={`font-semibold ${isHoneypot ? 'text-red-500 font-bold tracking-wide' : isCritical ? 'text-red-400' : 'text-brand-primary'}`}>
                             {isHoneypot ? 'HONEYPOT TRIGGERED' : isCritical ? 'CRITICAL ALERT' : 'Failed Login Attempt'}
                           </h3>
                           <span className="text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-md border border-white/10">
@@ -194,12 +196,12 @@ export default async function SecurityDashboard({
                         </p>
                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2">
                           {alert.country ? (
-                            <span className="flex items-center gap-1.5 opacity-80 font-medium text-teal-400">
+                            <span className="flex items-center gap-1.5 opacity-80 font-medium text-brand-primary">
                               <MapPin className="w-3.5 h-3.5" />
                               {decodeSafe(alert.city)}, {decodeSafe(alert.country)} {countryToFlag(alert.country)}
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1.5 opacity-80 font-mono text-teal-600 border border-teal-800/30 bg-teal-950/20 px-1.5 py-0.5 rounded">
+                            <span className="flex items-center gap-1.5 opacity-80 font-mono text-brand-primary border border-brand-primary/30 bg-brand-primary/20 px-1.5 py-0.5 rounded">
                               <MapPin className="w-3.5 h-3.5" />
                               VERCEL_EDGE_BYPASS // LOCAL_NET
                             </span>
@@ -209,7 +211,7 @@ export default async function SecurityDashboard({
                               ? 'bg-red-500/20 text-red-400 border border-red-500/20' 
                               : isCritical 
                                 ? 'bg-red-500/10 text-red-300' 
-                                : 'bg-teal-500/10 text-teal-300'
+                                : 'bg-brand-primary/10 text-brand-primary'
                           }`}>
                             {ip}
                           </span>
@@ -283,7 +285,7 @@ export default async function SecurityDashboard({
                       </div>
                       <div>
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">User-Agent Signature</h4>
-                        <p className="text-xs font-mono text-gray-300 break-words bg-black/40 p-2 rounded border border-white/5">
+                        <p className="text-xs font-mono text-gray-300 break-words bg-[#161c2d]/40 p-2 rounded border border-white/5">
                           {userAgent}
                         </p>
                       </div>

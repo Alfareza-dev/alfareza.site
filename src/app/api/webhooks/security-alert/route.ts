@@ -30,9 +30,10 @@ export async function POST(req: Request) {
 
     const record = payload.record;
     
-    // Only process HONEYPOT_TRIGGERED
-    if (record.action !== 'HONEYPOT_TRIGGERED') {
-      return NextResponse.json({ message: 'Ignored: Action is not HONEYPOT_TRIGGERED' }, { status: 200 });
+    // STRICT LOOP PREVENTION: Only process actual attack alerts
+    const attackActions = ['HONEYPOT_TRIGGERED', 'SQL_INJECTION', 'XSS_ATTACK', 'BRUTE_FORCE'];
+    if (!attackActions.includes(record.action)) {
+      return NextResponse.json({ ok: true, message: `Ignored routine C2 action: ${record.action}` }, { status: 200 });
     }
 
     // 2. SCHEMA ADJUSTMENT - Extract Attacker Info
@@ -121,6 +122,11 @@ ${geminiAnalysis.replace(/```html|```/gi, '').trim()}
           text: message,
           parse_mode: 'HTML',
           disable_web_page_preview: true,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: `🔓 Unblock IP`, callback_data: `ublk_${ipAddress}` }]
+            ]
+          }
         }),
       });
     }

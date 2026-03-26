@@ -40,20 +40,20 @@ export async function POST(req: Request) {
     const isp = record.isp || 'Unknown';
     const flag = getFlagEmoji(record.country);
     
-    let parsedDetails: any = {};
-    if (typeof record.details === 'string') {
-      try {
-        parsedDetails = JSON.parse(record.details);
-      } catch (e) {
-        parsedDetails = { raw: record.details };
-      }
-    } else if (typeof record.details === 'object' && record.details !== null) {
-      parsedDetails = record.details;
-    }
+    let ipAddress = 'Unknown IP';
+    let userAgent = 'Unknown User-Agent';
+    let requestedPath = 'Unknown Path';
 
-    const ipAddress = parsedDetails.ip || parsedDetails.ip_address || 'Unknown IP';
-    const userAgent = parsedDetails.user_agent || parsedDetails.userAgent || 'Unknown User-Agent';
-    const requestedPath = parsedDetails.path || parsedDetails.url || 'Unknown Path';
+    if (typeof record.details === 'string') {
+      // Example details string: "Honeypot accessed at path: /.env | IP: 194.5.82.43 | User-Agent: Mozilla/5.0..."
+      const pathMatch = record.details.match(/path:\s*([^|]+)/i);
+      const ipMatch = record.details.match(/IP:\s*([^|]+)/i);
+      const uaMatch = record.details.match(/User-Agent:\s*(.*)/i);
+
+      if (pathMatch) requestedPath = pathMatch[1].trim();
+      if (ipMatch) ipAddress = ipMatch[1].trim();
+      if (uaMatch) userAgent = uaMatch[1].trim();
+    }
 
     // 3. GEMINI AI ANALYSIS
     let geminiAnalysis = '';
@@ -68,7 +68,7 @@ Lokasi: ${city}, ${country}
 ISP: ${isp}
 Target Path: ${requestedPath}
 User-Agent: ${userAgent}
-Details: ${JSON.stringify(parsedDetails)}`;
+Details: ${record.details}`;
 
       try {
         const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {

@@ -73,7 +73,7 @@ Select an action below:`;
 
       const replyMarkup = {
         inline_keyboard: [
-          [{ text: `⚙️ Maintenance Mode (${isMaint ? 'ON' : 'OFF'})`, callback_data: 'toggle_maint' }, { text: '📋 Recent Activity', callback_data: 'view_activity' }],
+          [{ text: `🛠️ Maint: ${isMaint ? 'ON' : 'OFF'}`, callback_data: 'toggle_maint' }, { text: '📋 Activity Logs', callback_data: 'view_activity' }],
           [{ text: '📥 View Unread Inbox', callback_data: 'view_inbox' }]
         ]
       };

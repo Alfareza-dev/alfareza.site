@@ -78,7 +78,7 @@ Details: ${record.details}`;
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({
           model: 'gemini-2.5-flash',
-          systemInstruction: "Anda adalah sistem otomatis. Hanya keluarkan teks sesuai template HTML yang diminta. Dilarang menggunakan kalimat pembuka atau penutup."
+          systemInstruction: "CRITICAL: Do NOT use markdown formatting. Do NOT wrap the response in ```html or any code blocks. Output pure text only. Anda adalah sistem otomatis. Hanya keluarkan teks sesuai template HTML yang diminta."
         });
 
         const result = await model.generateContent(prompt);
@@ -98,7 +98,18 @@ Details: ${record.details}`;
     const telegramChatId = process.env.TELEGRAM_CHAT_ID;
 
     if (telegramBotToken && telegramChatId) {
-      const message = `🚨 <b>SECURITY ALERT!</b> 🚨\n\n${geminiAnalysis}\n\n<a href="https://alfareza.site/admin">View Dashboard</a>`;
+      // Re-add the static header (IP, Lokasi, ISP, Target) as requested
+      const message = `🚨 <b>SECURITY ALERT!</b> 🚨
+
+<b>IP:</b> <code>${ipAddress}</code>
+<b>Lokasi:</b> ${flag} ${city}, ${country}
+<b>ISP:</b> ${isp}
+<b>Target:</b> <code>${requestedPath}</code>
+
+<b>🛡️ Analisis AI:</b>
+${geminiAnalysis.replace(/```html|```/gi, '').trim()}
+
+<a href="https://alfareza.site/admin">View Dashboard</a>`;
 
       await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
         method: 'POST',

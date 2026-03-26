@@ -27,14 +27,15 @@ export async function POST(req: Request) {
       const chatId = body.message.chat.id.toString();
       
       // SILENTLY DROP UNAUTHORIZED
-      if (chatId !== TELEGRAM_CHAT_ID) {
+      if (chatId !== String(TELEGRAM_CHAT_ID)) {
         return NextResponse.json({ ok: true });
       }
 
       const text = body.message.text || '';
       
       if (text.startsWith('/menu')) {
-        const { count: logsCount } = await supabase.from('activity_logs').select('*', { count: 'exact', head: true });
+        const { count: logsCount, error } = await supabase.from('activity_logs').select('*', { count: 'exact', head: true });
+        if (error) console.error('Supabase error fetching activity logs:', error);
         
         const messageText = `🎛️ <b>C2 Dashboard Menu</b>\n\n📊 Total Activity Logs: ${logsCount || 0}\n\nSelect an action below:`;
         
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
       const messageId = callbackQuery.message.message_id;
       
       // SILENTLY DROP UNAUTHORIZED
-      if (chatId !== TELEGRAM_CHAT_ID) {
+      if (chatId !== String(TELEGRAM_CHAT_ID)) {
         return NextResponse.json({ ok: true });
       }
 
@@ -67,15 +68,18 @@ export async function POST(req: Request) {
 
       // Toggle Maintenance Mode
       if (data === 'toggle_maintenance') {
-        const { data: setting } = await supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single();
+        const { data: setting, error: fetchErr } = await supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single();
+        if (fetchErr) console.error('Supabase error fetching settings:', fetchErr);
+        
         const newVal = setting?.value === 'true' ? 'false' : 'true';
         
         // Update database
-        await supabase.from('site_settings').upsert({
+        const { error: upsertErr } = await supabase.from('site_settings').upsert({
           key: 'maintenance_mode',
           value: newVal,
           updated_at: new Date().toISOString()
         });
+        if (upsertErr) console.error('Supabase error updating settings:', upsertErr);
 
         // Edit the message to show confirmation
         await telegramAPI('editMessageText', {
@@ -86,21 +90,22 @@ export async function POST(req: Request) {
         });
       }
 
-      // View Unread Inbox
+      // View Unread Inbox (Schema: messages)
       if (data === 'view_inbox') {
-        const { data: messages } = await supabase.from('inbox')
+        const { data: messages, error } = await supabase.from('messages')
           .select('*')
           .eq('is_read', false)
           .order('created_at', { ascending: false })
           .limit(5);
+        if (error) console.error('Supabase error fetching messages:', error);
 
         let text = messages && messages.length > 0 ? `📥 <b>Unread Inbox:</b>\n\n` : `📥 <b>Inbox Empty! All caught up.</b>`;
         let buttons: any[] = [];
 
         if (messages) {
           messages.forEach((m: any, idx: number) => {
-            text += `${idx + 1}. From: ${m.name || m.email}\n`;
-            buttons.push({ text: `Read [${idx + 1}]`, callback_data: `read_msg_${m.id}` });
+            text += `${idx + 1}. From: ${m.full_name || m.email}\n`;
+            buttons.push({ text: `Read [${idx + 1}]`, callback_data: `rd_msg_${m.id}` });
           });
         }
 
@@ -115,12 +120,13 @@ export async function POST(req: Request) {
       }
 
       // Read Specific Message
-      if (data.startsWith('read_msg_')) {
-        const msgId = data.replace('read_msg_', '');
-        const { data: m } = await supabase.from('inbox').select('*').eq('id', msgId).single();
+      if (data.startsWith('rd_msg_')) {
+        const msgId = data.replace('rd_msg_', '');
+        const { data: m, error } = await supabase.from('messages').select('*').eq('id', msgId).single();
+        if (error) console.error('Supabase error reading msg:', error);
         
         if (m) {
-          const text = `📬 <b>Message:</b>\n<b>From:</b> ${m.name}\n<b>Email:</b> ${m.email}\n\n${m.message}`;
+          const text = `📬 <b>Message:</b>\n<b>From:</b> ${m.full_name}\n<b>Email:</b> ${m.email}\n\n${m.content}`;
           
           await telegramAPI('sendMessage', {
             chat_id: chatId,
@@ -129,8 +135,8 @@ export async function POST(req: Request) {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: '✅ Mark Read', callback_data: `mark_msg_${m.id}` },
-                  { text: '🗑 Delete', callback_data: `del_msg_${m.id}` }
+                  { text: '✅ Mark Read', callback_data: `mk_msg_${m.id}` },
+                  { text: '🗑 Delete', callback_data: `dl_msg_${m.id}` }
                 ]
               ]
             }
@@ -139,9 +145,10 @@ export async function POST(req: Request) {
       }
 
       // Mark Message as Read
-      if (data.startsWith('mark_msg_')) {
-        const msgId = data.replace('mark_msg_', '');
-        await supabase.from('inbox').update({ is_read: true }).eq('id', msgId);
+      if (data.startsWith('mk_msg_')) {
+        const msgId = data.replace('mk_msg_', '');
+        const { error } = await supabase.from('messages').update({ is_read: true }).eq('id', msgId);
+        if (error) console.error('Supabase error marking msg read:', error);
         
         await telegramAPI('editMessageText', {
           chat_id: chatId,
@@ -152,9 +159,10 @@ export async function POST(req: Request) {
       }
 
       // Delete Message
-      if (data.startsWith('del_msg_')) {
-        const msgId = data.replace('del_msg_', '');
-        await supabase.from('inbox').delete().eq('id', msgId);
+      if (data.startsWith('dl_msg_')) {
+        const msgId = data.replace('dl_msg_', '');
+        const { error } = await supabase.from('messages').delete().eq('id', msgId);
+        if (error) console.error('Supabase error deleting msg:', error);
         
         await telegramAPI('editMessageText', {
           chat_id: chatId,

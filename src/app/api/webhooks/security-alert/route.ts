@@ -61,7 +61,11 @@ export async function POST(req: Request) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
     if (geminiApiKey) {
-      const prompt = `Kamu adalah Senior Security Analyst dari alfareza.site. Berikan analisis singkat dan tajam dalam Bahasa Indonesia yang santai tapi profesional. Beritahu Alfareza seberapa berbahaya serangan ini dan apa motif si penyerang.
+      const prompt = `Analisis log serangan ke alfareza.site ini. DILARANG basa-basi, dilarang menyapa. Langsung berikan output dengan format persis seperti ini:
+
+<b>🎯 Target:</b> ${requestedPath} ([Buat julukan spesifik, misal: Si Pemburu Harta Karun untuk .env, Si Pemburu WordPress untuk xmlrpc, Si Pencuri Kode untuk .git, dsb])
+<b>🔍 Yang Dicari:</b> [1 kalimat teknis menjelaskan apa fungsi file/path ini dan rahasia apa yang ingin dicuri]
+<b>⚠️ Analisis & Bahaya:</b> [1-2 kalimat menganalisis motif bot berdasarkan User-Agent/Path. Jelaskan apa bahayanya jika mereka berhasil, namun tegaskan sistem aman karena terblokir Honeypot.]
 
 Log Data:
 IP: ${ipAddress}
@@ -75,7 +79,7 @@ Details: ${record.details}`;
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({
           model: 'gemini-2.5-flash',
-          systemInstruction: "Berikan laporan yang concise (maksimal 3 kalimat)."
+          systemInstruction: "Anda adalah sistem otomatis. Hanya keluarkan teks sesuai template HTML yang diminta. Dilarang menggunakan kalimat pembuka atau penutup."
         });
 
         const result = await model.generateContent(prompt);

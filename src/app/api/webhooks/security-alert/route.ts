@@ -74,7 +74,7 @@ Details: ${record.details}`;
       try {
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.5-flash',
           systemInstruction: "Berikan laporan yang concise (maksimal 3 kalimat)."
         });
 

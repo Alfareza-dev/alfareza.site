@@ -18,9 +18,20 @@ async function telegramAPI(method: string, body: any) {
   });
 }
 
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  return NextResponse.json({ status: "Telegram Webhook Endpoint is Alive", timestamp: new Date() }, { status: 200 });
+}
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      return NextResponse.json({ ok: true, message: 'Invalid JSON payload' });
+    }
 
     // HANDLE MESSAGES (/menu command)
     if (body.message) {

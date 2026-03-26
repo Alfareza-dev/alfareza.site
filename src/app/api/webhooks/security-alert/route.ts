@@ -61,17 +61,16 @@ export async function POST(req: Request) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
     if (geminiApiKey) {
-      const prompt = `Analisis log serangan ke alfareza.site ini. DILARANG basa-basi, dilarang menyapa. Langsung berikan output dengan format persis seperti ini:
+      const prompt = `Modify the prompt generation to enforce this strict structure (no conversational filler):
 
-<b>🎯 Target:</b> ${requestedPath} ([Buat julukan spesifik, misal: Si Pemburu Harta Karun untuk .env, Si Pemburu WordPress untuk xmlrpc, Si Pencuri Kode untuk .git, dsb])
-<b>🔍 Yang Dicari:</b> [1 kalimat teknis menjelaskan apa fungsi file/path ini dan rahasia apa yang ingin dicuri]
-<b>⚠️ Analisis & Bahaya:</b> [1-2 kalimat menganalisis motif bot berdasarkan User-Agent/Path. Jelaskan apa bahayanya jika mereka berhasil, namun tegaskan sistem aman karena terblokir Honeypot.]
+🤖 User-Agent: [Analyze the UA. Explain briefly, e.g., "Normal Browser" or "l9scan - Mesin pencari kebocoran data otomatis"]
 
-Log Data:
+🌐 IP Asal: Bot/User dari ${city}, ${country}
+
+🎯 Target Serangan: ${requestedPath} - [Brief 1-sentence explanation of what this file holds and why it's targeted, e.g., "File penting berisi data API Key"]
+
+Context Data:
 IP: ${ipAddress}
-Lokasi: ${city}, ${country}
-ISP: ${isp}
-Target Path: ${requestedPath}
 User-Agent: ${userAgent}
 Details: ${record.details}`;
 
@@ -99,17 +98,7 @@ Details: ${record.details}`;
     const telegramChatId = process.env.TELEGRAM_CHAT_ID;
 
     if (telegramBotToken && telegramChatId) {
-      const message = `🚨 <b>SECURITY ALERT!</b> 🚨
-
-<b>IP:</b> <code>${ipAddress}</code>
-<b>Lokasi:</b> ${flag} ${city}, ${country}
-<b>ISP:</b> ${isp}
-<b>Target:</b> <code>${requestedPath}</code>
-
-<b>🛡️ Analisis:</b>
-${geminiAnalysis}
-
-<a href="https://alfareza.site/admin">View Dashboard</a>`;
+      const message = `🚨 <b>SECURITY ALERT!</b> 🚨\n\n${geminiAnalysis}\n\n<a href="https://alfareza.site/admin">View Dashboard</a>`;
 
       await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
         method: 'POST',

@@ -54,6 +54,7 @@ export function HeroSection() {
           fill
           sizes="100vw"
           priority={true}
+          unoptimized={true}
           fetchPriority="high"
           className="object-cover object-bottom opacity-60"
           style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}

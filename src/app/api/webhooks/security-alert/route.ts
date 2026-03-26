@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Helper to convert 2-letter country code to flag emoji
 function getFlagEmoji(countryCode: string | null) {
@@ -71,27 +72,16 @@ User-Agent: ${userAgent}
 Details: ${record.details}`;
 
       try {
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: {
-              parts: [{ text: "Berikan laporan yang concise (maksimal 3 kalimat)." }]
-            }
-          }),
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          systemInstruction: "Berikan laporan yang concise (maksimal 3 kalimat)."
         });
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          geminiAnalysis = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        } else {
-          console.error('Gemini API Error:', await geminiRes.text());
-        }
+        const result = await model.generateContent(prompt);
+        geminiAnalysis = result.response.text();
       } catch (error) {
-        console.error('Failed to fetch from Gemini:', error);
+        console.error('Failed to fetch from Gemini SDK:', error);
       }
     }
 

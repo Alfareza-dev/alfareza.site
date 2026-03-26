@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition, useState, useRef } from "react";
-import { submitContactForm } from "@/app/actions/contact";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 
@@ -15,15 +14,26 @@ export function ContactForm() {
   const handleSubmit = (formData: FormData) => {
     setErrorMsg(null);
     setFieldErrors({});
-    
+
     startTransition(async () => {
       try {
-        const result = await submitContactForm(null, formData);
-        if (result.success) {
+        const payload = {
+          full_name: formData.get('full_name'),
+          email: formData.get('email'),
+          subject: formData.get('subject'),
+          content: formData.get('content')
+        };
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        if (response.ok && result.success) {
           setSuccess(true);
           formRef.current?.reset();
         } else {
-          setFieldErrors(result.errors || {});
           setErrorMsg(result.error || "An error occurred");
         }
       } catch (err: any) {

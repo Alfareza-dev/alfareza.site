@@ -168,18 +168,30 @@ Select an action below:`;
         const { data: messages } = await query;
 
         if (!messages || messages.length === 0) {
-          await telegramAPI('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: `📥 <b>All messages read!</b>\nNo unread communications in your inbox.`,
-            parse_mode: 'HTML',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '📁 Show All Messages (Top 5)', callback_data: 'show_all_msgs' }],
-                [{ text: '🔙 Back', callback_data: 'back_to_menu' }]
-              ]
-            }
-          });
+          if (data === 'show_all_msgs') {
+            await telegramAPI('editMessageText', {
+              chat_id: chatId,
+              message_id: messageId,
+              text: `📭 <b>The database is completely empty.</b>\nNo messages found.`,
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [[{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]]
+              }
+            });
+          } else {
+            await telegramAPI('editMessageText', {
+              chat_id: chatId,
+              message_id: messageId,
+              text: `📥 <b>All messages read!</b>\nNo unread communications in your inbox.`,
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '📁 Show All Messages (Top 5)', callback_data: 'show_all_msgs' }],
+                  [{ text: '🔙 Back', callback_data: 'back_to_menu' }]
+                ]
+              }
+            });
+          }
         } else {
           let text = `📥 <b>${data === 'view_inbox' ? 'Unread Inbox' : 'Latest Messages (All)'}:</b>\n\n`;
           let buttons: any[] = [];
@@ -206,6 +218,10 @@ Select an action below:`;
         
         if (m) {
           const text = `📬 <b>Message:</b>\n<b>From:</b> ${m.full_name}\n<b>Email:</b> ${m.email}\n\n${m.content}`;
+          const isReadBtn = m.is_read 
+            ? { text: '🔴 Mark Unread', callback_data: `unrd_msg_${m.id}` }
+            : { text: '✅ Mark Read', callback_data: `mk_msg_${m.id}` };
+
           await telegramAPI('editMessageText', {
             chat_id: chatId,
             message_id: messageId,
@@ -213,7 +229,7 @@ Select an action below:`;
             parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [
-                [ { text: '✅ Mark Read', callback_data: `mk_msg_${m.id}` }, { text: '🗑 Delete', callback_data: `dl_msg_${m.id}` } ],
+                [ isReadBtn, { text: '🗑 Delete', callback_data: `dl_msg_${m.id}` } ],
                 [ { text: '🔙 Back', callback_data: 'view_inbox' } ]
               ]
             }
@@ -230,6 +246,20 @@ Select an action below:`;
           chat_id: chatId,
           message_id: messageId,
           text: `✅ Message marked as read.`,
+          parse_mode: 'HTML',
+          reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Inbox', callback_data: 'view_inbox' }]] }
+        });
+      }
+
+      else if (data.startsWith('unrd_msg_')) {
+        const msgId = data.replace('unrd_msg_', '');
+        await supabase.from('messages').update({ is_read: false }).eq('id', msgId);
+        await supabase.from('activity_logs').insert({ action: 'MESSAGE_UNREAD', details: { id: msgId }, admin_email: 'telegram_c2' });
+        
+        await telegramAPI('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: `🔴 Message marked as unread.`,
           parse_mode: 'HTML',
           reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Inbox', callback_data: 'view_inbox' }]] }
         });

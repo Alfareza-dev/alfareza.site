@@ -42,11 +42,12 @@ export async function POST(req: Request) {
 
     // --- HELPER TO RENDER MAIN DASHBOARD ---
     const renderDashboard = async (messageIdToEdit?: number) => {
-      const [visits, blocked, activity, lastLogin] = await Promise.all([
+      const [visits, blocked, activity, lastLogin, siteSettings] = await Promise.all([
         supabase.from('visitor_stats').select('ip_address'),
         supabase.from('blocked_ips').select('*', { count: 'exact', head: true }),
         supabase.from('activity_logs').select('*', { count: 'exact', head: true }).in('action', ['HONEYPOT_TRIGGERED', 'SQL_INJECTION', 'XSS_ATTACK', 'BRUTE_FORCE']),
-        supabase.from('activity_logs').select('created_at').eq('action', 'ADMIN_LOGIN').order('created_at', { ascending: false }).limit(1)
+        supabase.from('activity_logs').select('created_at').eq('action', 'ADMIN_LOGIN').order('created_at', { ascending: false }).limit(1),
+        supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single()
       ]);
 
       const totalVisits = visits.data?.length || 0;
@@ -54,6 +55,8 @@ export async function POST(req: Request) {
       const bannedCount = blocked.count || 0;
       const alertCount = activity.count || 0;
       const lastLoginTime = lastLogin.data && lastLogin.data[0] ? new Date(lastLogin.data[0].created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : 'Never';
+      
+      const isMaint = siteSettings.data?.value === 'true';
 
       const messageText = `🎛️ <b>C2 Operations Dashboard</b> 🎛️
 
@@ -70,7 +73,7 @@ Select an action below:`;
 
       const replyMarkup = {
         inline_keyboard: [
-          [{ text: '⚙️ Maintenance Mode', callback_data: 'ask_maint' }, { text: '📋 Recent Activity', callback_data: 'view_activity' }],
+          [{ text: `⚙️ Maintenance Mode (${isMaint ? 'ON' : 'OFF'})`, callback_data: 'toggle_maint' }, { text: '📋 Recent Activity', callback_data: 'view_activity' }],
           [{ text: '📥 View Unread Inbox', callback_data: 'view_inbox' }]
         ]
       };
@@ -101,22 +104,24 @@ Select an action below:`;
       }
 
       // --- MAINTENANCE FLOW ---
-      else if (data === 'ask_maint') {
+      else if (data === 'toggle_maint') {
+        const { data: setting } = await supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single();
+        const isMaint = setting?.value === 'true';
         await telegramAPI('editMessageText', {
           chat_id: chatId,
           message_id: messageId,
-          text: `⚠️ <b>Are you sure you want to toggle Maintenance Mode?</b>\nThis will instantly lock or unlock the site frontend.`,
+          text: `⚠️ <b>Are you sure you want to toggle maintenance?</b>\nCurrent state: ${isMaint ? 'ON' : 'OFF'}\nThis will safely lock/unlock frontend traffic.`,
           parse_mode: 'HTML',
           reply_markup: {
              inline_keyboard: [
-               [{ text: '✅ YES, Proceed', callback_data: 'confirm_maint' }],
-               [{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]
+               [{ text: '✅ Confirm', callback_data: 'cfm_maint' }],
+               [{ text: '❌ Cancel', callback_data: 'back_to_menu' }]
              ]
           }
         });
       }
 
-      else if (data === 'confirm_maint') {
+      else if (data === 'cfm_maint') {
         const { data: setting } = await supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single();
         const newVal = setting?.value === 'true' ? 'false' : 'true';
         
@@ -126,7 +131,7 @@ Select an action below:`;
         await telegramAPI('editMessageText', {
           chat_id: chatId,
           message_id: messageId,
-          text: `✅ Maintenance mode turned <b>${newVal === 'true' ? 'ON' : 'OFF'}</b>.`,
+          text: `✅ Maintenance mode successfully turned <b>${newVal === 'true' ? 'ON' : 'OFF'}</b>.`,
           parse_mode: 'HTML',
           reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]] }
         });
@@ -156,28 +161,43 @@ Select an action below:`;
       }
 
       // --- INBOX FLOW ---
-      else if (data === 'view_inbox') {
-        const { data: messages } = await supabase.from('messages').select('*').eq('is_read', false).order('created_at', { ascending: false }).limit(5);
+      else if (data === 'view_inbox' || data === 'show_all_msgs') {
+        const query = supabase.from('messages').select('*').order('created_at', { ascending: false }).limit(5);
+        if (data === 'view_inbox') query.eq('is_read', false);
+        
+        const { data: messages } = await query;
 
-        let text = messages && messages.length > 0 ? `📥 <b>Unread Inbox:</b>\n\n` : `📥 <b>Inbox Empty! All caught up.</b>`;
-        let buttons: any[] = [];
-
-        if (messages) {
+        if (!messages || messages.length === 0) {
+          await telegramAPI('editMessageText', {
+            chat_id: chatId,
+            message_id: messageId,
+            text: `📥 <b>All messages read!</b>\nNo unread communications in your inbox.`,
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: '📁 Show All Messages (Top 5)', callback_data: 'show_all_msgs' }],
+                [{ text: '🔙 Back', callback_data: 'back_to_menu' }]
+              ]
+            }
+          });
+        } else {
+          let text = `📥 <b>${data === 'view_inbox' ? 'Unread Inbox' : 'Latest Messages (All)'}:</b>\n\n`;
+          let buttons: any[] = [];
+  
           messages.forEach((m: any, idx: number) => {
             text += `${idx + 1}. From: ${m.full_name || m.email}\n`;
             buttons.push({ text: `Read [${idx + 1}]`, callback_data: `rd_msg_${m.id}` });
           });
+  
+          const keyboard = [...buttons.map(b => [b]), [{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]];
+          await telegramAPI('editMessageText', {
+            chat_id: chatId,
+            message_id: messageId,
+            text: text,
+            parse_mode: 'HTML',
+            reply_markup: { inline_keyboard: keyboard }
+          });
         }
-
-        const keyboard = buttons.length ? [...buttons.map(b => [b]), [{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]] : [[{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]];
-
-        await telegramAPI('editMessageText', {
-          chat_id: chatId,
-          message_id: messageId,
-          text: text,
-          parse_mode: 'HTML',
-          reply_markup: { inline_keyboard: keyboard }
-        });
       }
 
       else if (data.startsWith('rd_msg_')) {
@@ -215,8 +235,25 @@ Select an action below:`;
         });
       }
 
+      // --- DELETE MESSAGE (2-STEP) ---
       else if (data.startsWith('dl_msg_')) {
         const msgId = data.replace('dl_msg_', '');
+        await telegramAPI('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: `⚠️ <b>Are you sure you want to permanently delete this message?</b>\nThis action cannot be undone.`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '✅ Delete', callback_data: `cfm_del_${msgId}` }],
+              [{ text: '❌ Cancel', callback_data: 'view_inbox' }]
+            ]
+          }
+        });
+      }
+
+      else if (data.startsWith('cfm_del_')) {
+        const msgId = data.replace('cfm_del_', '');
         await supabase.from('messages').delete().eq('id', msgId);
         await supabase.from('activity_logs').insert({ action: 'MESSAGE_DELETED', details: { id: msgId }, admin_email: 'telegram_c2' });
         
@@ -229,18 +266,43 @@ Select an action below:`;
         });
       }
 
-      // --- UNBLOCK IP FLOW ---
+      // --- UNBLOCK IP (2-STEP) ---
       else if (data.startsWith('ublk_')) {
         const ipToUnblock = data.replace('ublk_', '');
-        await supabase.from('blocked_ips').delete().eq('ip', ipToUnblock);
-        await supabase.from('activity_logs').insert({ action: 'IP_UNBLOCKED', details: { ip: ipToUnblock }, admin_email: 'telegram_c2' });
-
-        // Grab original text to append status
-        const originalText = callbackQuery.message?.text || callbackQuery.message?.caption || '🚨 SECURITY ALERT!';
         await telegramAPI('editMessageText', {
           chat_id: chatId,
           message_id: messageId,
-          text: `${originalText}\n\n✅ <b>IP <code>${ipToUnblock}</code> UNBLOCKED FROM TELEGRAM C2</b>`,
+          text: `⚠️ <b>Are you sure you want to unblock this IP?</b>\nIP: <code>${ipToUnblock}</code>`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '✅ Unblock', callback_data: `cfm_unb_${ipToUnblock}` }],
+              [{ text: '❌ Cancel', callback_data: 'back_to_menu' }]
+            ]
+          }
+        });
+      }
+      
+      else if (data.startsWith('cfm_unb_')) {
+        const ipToUnblock = data.replace('cfm_unb_', '');
+        await supabase.from('blocked_ips').delete().eq('ip', ipToUnblock);
+        await supabase.from('activity_logs').insert({ action: 'IP_UNBLOCKED', details: { ip: ipToUnblock }, admin_email: 'telegram_c2' });
+
+        await telegramAPI('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: `✅ <b>IP <code>${ipToUnblock}</code> UNBLOCKED FROM TELEGRAM C2</b>`,
+          parse_mode: 'HTML',
+          reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Menu', callback_data: 'back_to_menu' }]] }
+        });
+      }
+      
+      else if (data === 'ignore_msg') {
+        const originalText = callbackQuery.message?.text || '';
+        await telegramAPI('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: `${originalText}\n\n<b>[👀 System: Notification Ignored]</b>`,
           parse_mode: 'HTML'
         });
       }

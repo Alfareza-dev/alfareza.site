@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Helper to convert 2-letter country code to flag emoji
 function getFlagEmoji(countryCode: string | null) {
@@ -57,58 +56,20 @@ export async function POST(req: Request) {
       if (uaMatch) userAgent = uaMatch[1].trim();
     }
 
-    // 3. GEMINI AI ANALYSIS
-    let geminiAnalysis = '';
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-
-    if (geminiApiKey) {
-      const prompt = `Modify the prompt generation to enforce this strict structure (no conversational filler):
-
-🤖 User-Agent: [Analyze the UA. Explain briefly, e.g., "Normal Browser" or "l9scan - Mesin pencari kebocoran data otomatis"]
-
-🌐 IP Asal: Bot/User dari ${city}, ${country}
-
-🎯 Target Serangan: ${requestedPath} - [Brief 1-sentence explanation of what this file holds and why it's targeted, e.g., "File penting berisi data API Key"]
-
-Context Data:
-IP: ${ipAddress}
-User-Agent: ${userAgent}
-Details: ${record.details}`;
-
-      try {
-        const genAI = new GoogleGenerativeAI(geminiApiKey);
-        const model = genAI.getGenerativeModel({
-          model: 'gemini-2.5-flash',
-          systemInstruction: "CRITICAL: Do NOT use markdown formatting. Do NOT wrap the response in ```html or any code blocks. Output pure text only. Anda adalah sistem otomatis. Hanya keluarkan teks sesuai template HTML yang diminta."
-        });
-
-        const result = await model.generateContent(prompt);
-        geminiAnalysis = result.response.text();
-      } catch (error) {
-        console.error('Failed to fetch from Gemini SDK:', error);
-      }
-    }
-
-    // Fallback analysis if Gemini fails or is empty
-    if (!geminiAnalysis) {
-      geminiAnalysis = `<b>⚠️ Analisis Otomatis Gagal:</b>\nMendeteksi pemicuan honeypot di path <code>${requestedPath}</code>. Harap periksa dashboard untuk detail lebih lanjut.`;
-    }
-
-    // 4. TELEGRAM UI IMPROVEMENT
+    // 3. TELEGRAM UI IMPROVEMENT
     const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
     const telegramChatId = process.env.TELEGRAM_CHAT_ID;
 
     if (telegramBotToken && telegramChatId) {
-      // Re-add the static header (IP, Lokasi, ISP, Target) as requested
       const message = `🚨 <b>SECURITY ALERT!</b> 🚨
 
 <b>IP:</b> <code>${ipAddress}</code>
-<b>Lokasi:</b> ${flag} ${city}, ${country}
+<b>Location:</b> ${flag} ${city}, ${country}
 <b>ISP:</b> ${isp}
 <b>Target:</b> <code>${requestedPath}</code>
+<b>User-Agent:</b> <code>${userAgent}</code>
 
-<b>🛡️ Analisis AI:</b>
-${geminiAnalysis.replace(/```html|```/gi, '').trim()}
+⚠️ <b>Status: IP HAS BEEN BLOCKED</b>
 
 <a href="https://alfareza.site/admin">View Dashboard</a>`;
 

@@ -43,15 +43,14 @@ export async function POST(req: Request) {
     // --- HELPER TO RENDER MAIN DASHBOARD ---
     const renderDashboard = async (messageIdToEdit?: number) => {
       const [visits, blocked, activity, lastLogin, siteSettings] = await Promise.all([
-        supabase.from('visitor_stats').select('ip_address'),
+        supabase.from('visitor_stats').select('*', { count: 'exact', head: true }),
         supabase.from('blocked_ips').select('*', { count: 'exact', head: true }),
         supabase.from('activity_logs').select('*', { count: 'exact', head: true }).in('action', ['HONEYPOT_TRIGGERED', 'SQL_INJECTION', 'XSS_ATTACK', 'BRUTE_FORCE']),
         supabase.from('activity_logs').select('created_at').eq('action', 'ADMIN_LOGIN').order('created_at', { ascending: false }).limit(1),
         supabase.from('site_settings').select('value').eq('key', 'maintenance_mode').single()
       ]);
 
-      const totalVisits = visits.data?.length || 0;
-      const uniqueVisits = new Set(visits.data?.map(v => v.ip_address)).size || 0;
+      const totalVisits = visits.count || 0;
       const bannedCount = blocked.count || 0;
       const alertCount = activity.count || 0;
       const lastLoginTime = lastLogin.data && lastLogin.data[0] ? new Date(lastLogin.data[0].created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : 'Never';
@@ -62,7 +61,6 @@ export async function POST(req: Request) {
 
 <b>📈 Traffic Stats</b>
 • Total Visits: <code>${totalVisits}</code>
-• Unique IPs: <code>${uniqueVisits}</code>
 
 <b>🛡️ Security Posture</b>
 • Banned IPs: <code>${bannedCount}</code>
@@ -110,7 +108,7 @@ Select an action below:`;
         await telegramAPI('editMessageText', {
           chat_id: chatId,
           message_id: messageId,
-          text: `⚠️ <b>Are you sure you want to toggle maintenance?</b>\nCurrent state: ${isMaint ? 'ON' : 'OFF'}\nThis will safely lock/unlock frontend traffic.`,
+          text: `⚠️ <b>Are you sure you want to toggle maintenance?</b>\nCurrent state: ${isMaint ? 'ON' : 'OFF'}\nThis will ${isMaint ? 'unlock' : 'lock'} frontend traffic.`,
           parse_mode: 'HTML',
           reply_markup: {
              inline_keyboard: [
@@ -276,7 +274,7 @@ Select an action below:`;
           reply_markup: {
             inline_keyboard: [
               [{ text: '✅ Delete', callback_data: `cfm_del_${msgId}` }],
-              [{ text: '❌ Cancel', callback_data: 'view_inbox' }]
+              [{ text: '❌ Cancel', callback_data: 'show_all_msgs' }]
             ]
           }
         });
@@ -292,7 +290,7 @@ Select an action below:`;
           message_id: messageId,
           text: `🗑 Message deleted permanently.`,
           parse_mode: 'HTML',
-          reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Inbox', callback_data: 'view_inbox' }]] }
+          reply_markup: { inline_keyboard: [[{ text: '🔙 Back to Messages', callback_data: 'show_all_msgs' }]] }
         });
       }
 

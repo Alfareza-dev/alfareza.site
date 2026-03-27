@@ -15,20 +15,21 @@
 
 This repository houses the source code for [alfareza.site](https://alfareza.site), engineered as a secure, mission-critical application. Rather than relying on traditional admin dashboards, this project pushes the absolute limits of webhook integrations by building an exclusive **Command & Control (C2) interface directly inside Telegram**. 
 
-This system intercepts malicious web traffic and instantly dispatches raw, zero-latency attack vectors to a private Telegram channel. From there, administrators can execute 2-step verified mitigations entirely from their mobile devices.
+This system intercepts malicious web traffic, actively repels attackers, and instantly dispatches raw, zero-latency attack vectors to a private Telegram channel. From there, administrators can execute 2-step verified mitigations entirely from their mobile devices.
 
 ---
 
 ## 💎 Core Capabilities
 
-### 🪤 Adaptive Honeypots & Zero-Latency Alerts
-- **Intrusion Detection:** Intercepts automated scanners and malicious bots targeting sensitive directories (e.g., `/.env`, `/wp-admin`, `.git`).
+### 🪤 Active Honeypots & Zero-Latency Alerts
+- **Active Intrusion Repulsion:** Intercepts automated scanners targeting sensitive directories (e.g., `/.env`, `/wp-admin`, `.git`). Instead of passively dropping the request, it actively forcibly redirects the attacker to a `/banned` page, locking them out immediately.
 - **Zero-Latency Dispatch:** Bypasses heavy AI analysis to deliver deterministic, hardcoded tactical alerts instantly to Telegram, ensuring sub-second response times.
 - **Explicit Block Status:** Alerts include immediate visual confirmation of IP block status alongside quick-action mitigation buttons.
 - **Automated Logging:** Writes all honeypot triggers into PostgreSQL (`activity_logs`) for long-term auditing.
 
 ### 🎛️ Interactive Telegram C2 Dashboard 
 Invoking the `/menu` command renders a dynamic, stateful UI displaying your entire site's infrastructure in real time:
+- ⚡ **Live Server Telemetry:** Dynamically measures and displays real-time server response latency (Live Ping) directly within the dashboard.
 - 📊 **Large-Scale Accurate Analytics:** Uses optimized Supabase aggregations (`count: exact`) to bypass standard PostgREST 1K row limits, delivering precise real-time traffic stats directly to the C2 dashboard.
 - ⚙️ **Maintenance Toggles:** A stateful button that reflects (ON) or (OFF)—allowing you to instantly freeze frontend functionality.
 - 📋 **Audit Viewers:** Fetches your `activity_logs` directly into Telegram to read the last 5 high-profile backend actions.
@@ -53,12 +54,13 @@ graph TD
     B -.->|Real-time Triage Prompt| D[Telegram SOC Channel]
     
     E[Malicious Bot Activity] -->|Honeypot Trigger| F[(Supabase db: activity_logs)]
+    F -.->|Active Redirect to /banned| E
     F -.->|Webhook Post| G(API: /api/webhooks/security-alert)
     G -->|Extract Metadata| J[Format Native Alert]
     J -.->|Dispatches Native Alert| D
     
     D -->|/menu Command| I(API: /api/telegram/webhook)
-    I <-->|Fetch Stats & Validate States| C
+    I <-->|Fetch Stats, States & Live Ping| C
     I -.->|Renders C2 Dashboard| D
 ````
 
@@ -88,7 +90,7 @@ TELEGRAM_CHAT_ID="your-private-channel-id"
   - **Secret Gateway Validation:** PostgreSQL outbound webhooks rely entirely on `x-webhook-secret` headers before firing localized Node.js routines.
   - **Stateless Session Immunity:** Because this operates on direct Telegram session hashes and WAF layers, the C2 server natively deflects XSS or CSRF session-hijacking attempts common in traditional SSR admin wrappers.
 
-\<br /\>
-\<div align="center"\>
-\<i\>Deployed onto the edge with Vercel • Secured by Supabase.\</i\>
-\</div\>
+<br/>
+<div align="center">
+  <i>Deployed onto the edge with Vercel • Secured by Supabase.</i>
+</div>

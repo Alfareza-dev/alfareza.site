@@ -57,7 +57,12 @@ export async function POST(req: Request) {
       
       const isMaint = siteSettings.data?.value === 'true';
 
+      const start = Date.now();
+      await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL!, { method: 'HEAD' }).catch(() => {});
+      const pingTime = Date.now() - start;
+
       const messageText = `🎛️ <b>C2 Operations Dashboard</b> 🎛️
+⚡ Live Ping: ${pingTime}ms
 
 <b>📈 Traffic Stats</b>
 • Total Visits: <code>${totalVisits}</code>

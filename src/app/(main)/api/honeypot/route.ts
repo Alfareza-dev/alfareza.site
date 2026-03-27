@@ -45,17 +45,8 @@ async function trapAttacker(request: NextRequest) {
     city: request.headers.get("x-vercel-ip-city") || null,
   });
 
-  // 3. Respond with a deceptive 500 to avoid tipping off the attacker
-  return new NextResponse(
-    JSON.stringify({ error: "Internal Server Error", code: 500 }),
-    {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Error-Code": "INTERNAL_SERVER_ERROR",
-      },
-    }
-  );
+  // 3. Actively expel the attacker to the banned interface
+  return NextResponse.redirect(new URL('/banned', request.url));
 }
 
 export async function GET(request: NextRequest) {

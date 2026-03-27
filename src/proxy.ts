@@ -77,15 +77,22 @@ export async function proxy(request: NextRequest) {
     console.error("Middleware Cache-Bust Check Failed:", e);
   }
 
-  // Priority 1: BANNED — If IP is blocked, force /banned immediately
+  // Priority 1: BANNED — Trap Rule
   if (isBlocked && !path.startsWith('/banned')) {
     const url = request.nextUrl.clone();
     url.pathname = '/banned';
     return NextResponse.rewrite(url);
   }
 
-  // Priority 2: ADMIN BYPASS — Always allow /auth, /admin, /banned, /maintenance through
-  const bypassRoutes = ['/auth', '/admin', '/banned', '/maintenance', '/api'];
+  // Priority 1.5: EVICTION RULE — Kick unblocked IPs out of the penalty box
+  if (!isBlocked && path.startsWith('/banned')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
+  // Priority 2: ADMIN BYPASS — Always allow /auth, /admin, /maintenance, /api through
+  const bypassRoutes = ['/auth', '/admin', '/maintenance', '/api'];
   const isBypassRoute = bypassRoutes.some(route => path.startsWith(route));
 
   // Priority 3: MAINTENANCE MODE — Check site_settings table
